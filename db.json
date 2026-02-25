@@ -1,0 +1,369 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "Ahmed Hassan",
+      "email": "ahmed@masar.com",
+      "password": "123456",
+      "role": "instructor",
+      "specialization": "Data Science",
+      "centerName": null
+    },
+    {
+      "id": "2",
+      "name": "Sara Student",
+      "email": "sara@masar.com",
+      "password": "123456",
+      "role": "student",
+      "specialization": "Programming",
+      "centerName": null
+    },
+    {
+      "id": "3",
+      "name": "TechHub Owner",
+      "email": "center@masar.com",
+      "password": "123456",
+      "role": "center",
+      "specialization": null,
+      "centerName": "TechHub Khartoum"
+    },
+    {
+      "id": "4",
+      "name": "Osama Ali",
+      "email": "osama@masar.com",
+      "password": "123456",
+      "role": "marketer",
+      "specialization": "Digital Marketing",
+      "centerName": null
+    },
+    {
+      "id": "62d2",
+      "name": "ًWaleed Ahmed",
+      "email": "waleed@masar.com",
+      "password": "123456",
+      "role": "marketer",
+      "specialization": "Tech & Programming",
+      "centerName": null
+    }
+  ],
+  "instructorCourses": [
+    {
+      "id": "1",
+      "instructorId": 1,
+      "title": "Python for Data Science",
+      "image": "🐍",
+      "category": "Data Science",
+      "level": "Beginner",
+      "mode": "online",
+      "price": 150,
+      "status": "active",
+      "students": 320,
+      "rating": 4.8,
+      "revenue": 48000,
+      "startDate": "March 10, 2025",
+      "duration": "8 weeks",
+      "description": "From zero Python knowledge to building real data pipelines and analysis reports.",
+      "tags": "Python, Pandas, NumPy",
+      "enrollmentFields": [
+        {
+          "id": "fullName",
+          "required": true
+        },
+        {
+          "id": "phone",
+          "required": true
+        },
+        {
+          "id": "email",
+          "required": false
+        },
+        {
+          "id": "specialization",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "instructorId": 1,
+      "title": "Machine Learning Fundamentals",
+      "image": "🤖",
+      "category": "Data Science",
+      "level": "Advanced",
+      "mode": "online",
+      "price": 300,
+      "status": "active",
+      "students": 180,
+      "rating": 4.7,
+      "revenue": 54000,
+      "startDate": "March 20, 2025",
+      "duration": "10 weeks",
+      "description": "A rigorous introduction to machine learning theory and practice.",
+      "tags": "ML, TensorFlow, Scikit-learn",
+      "enrollmentFields": [
+        {
+          "id": "fullName",
+          "required": true
+        },
+        {
+          "id": "phone",
+          "required": true
+        },
+        {
+          "id": "email",
+          "required": true
+        },
+        {
+          "id": "educationLevel",
+          "required": false
+        },
+        {
+          "id": "experience",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "9",
+      "instructorId": 1,
+      "title": "Data Engineering Bootcamp",
+      "image": "🔧",
+      "category": "Data Science",
+      "level": "Intermediate",
+      "mode": "online",
+      "price": 280,
+      "status": "draft",
+      "students": 0,
+      "rating": 0,
+      "revenue": 0,
+      "startDate": "TBD",
+      "duration": "",
+      "description": "",
+      "tags": "",
+      "enrollmentFields": [
+        {
+          "id": "fullName",
+          "required": true
+        },
+        {
+          "id": "phone",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "a3a7",
+      "instructorId": "1",
+      "title": "Python",
+      "image": "🐍",
+      "category": "Data Science",
+      "level": "Beginner",
+      "mode": "online",
+      "price": 200,
+      "status": "draft",
+      "students": 0,
+      "rating": 0,
+      "revenue": 0,
+      "startDate": "2026-02-25",
+      "duration": "1 week",
+      "description": "Python for beginner",
+      "tags": "Python 101",
+      "enrollmentFields": [
+        {
+          "id": "fullName",
+          "required": true
+        },
+        {
+          "id": "phone",
+          "required": true
+        },
+        {
+          "id": "email",
+          "required": false
+        },
+        {
+          "id": "dateOfBirth",
+          "required": false
+        },
+        {
+          "id": "gender",
+          "required": false
+        },
+        {
+          "id": "linkedin",
+          "required": false
+        },
+        {
+          "id": "referral",
+          "required": false
+        }
+      ],
+      "meetLink": "",
+      "groupLink": "",
+      "location": "",
+      "scheduleDays": [
+        {
+          "day": "Thursday",
+          "time": "10:00",
+          "endTime": "12:00",
+          "type": "Live Lecture"
+        }
+      ],
+      "weeks": [
+        {
+          "title": "Introduction",
+          "topics": ""
+        },
+        {
+          "title": "",
+          "topics": ""
+        }
+      ]
+    }
+  ],
+  "enrollmentRequests": [
+    {
+      "id": "1",
+      "courseId": "1",
+      "instructorId": "1",
+      "name": "Rania Hassan",
+      "avatar": "RH",
+      "course": "Python for Data Science",
+      "phone": "0912-345-678",
+      "email": "rania@example.com",
+      "payment": "bank",
+      "amount": 150,
+      "time": "2 hours ago",
+      "status": "accepted",
+      "fields": {},
+      "marketerId": "4"
+    },
+    {
+      "id": "2",
+      "courseId": "1",
+      "instructorId": "1",
+      "name": "Kamal Ibrahim",
+      "avatar": "KI",
+      "course": "Python for Data Science",
+      "phone": "0911-222-333",
+      "email": "kamal@example.com",
+      "payment": "momo",
+      "amount": 150,
+      "time": "5 hours ago",
+      "status": "accepted",
+      "fields": {},
+      "marketerId": "4"
+    },
+    {
+      "id": "3",
+      "courseId": 3,
+      "instructorId": 1,
+      "name": "Nour Abdallah",
+      "avatar": "NA",
+      "course": "Machine Learning Fundamentals",
+      "phone": "0910-777-888",
+      "email": "nour@example.com",
+      "payment": "bank",
+      "amount": 300,
+      "time": "1 day ago",
+      "status": "accepted",
+      "fields": {}
+    },
+    {
+      "id": "4",
+      "courseId": 1,
+      "instructorId": 1,
+      "name": "Yassir Musa",
+      "avatar": "YM",
+      "course": "Python for Data Science",
+      "phone": "0912-999-000",
+      "email": "yassir@example.com",
+      "payment": "momo",
+      "amount": 150,
+      "time": "2 days ago",
+      "status": "rejected",
+      "fields": {}
+    },
+    {
+      "id": "5",
+      "courseId": 3,
+      "instructorId": 1,
+      "name": "Salma Elzain",
+      "avatar": "SE",
+      "course": "Machine Learning Fundamentals",
+      "phone": "0911-444-555",
+      "email": "salma@example.com",
+      "payment": "bank",
+      "amount": 300,
+      "time": "3 days ago",
+      "status": "accepted",
+      "fields": {}
+    }
+  ],
+  "marketerAssignments": [
+    {
+      "id": "ma1",
+      "courseId": "1",
+      "instructorId": "1",
+      "marketerId": "4",
+      "marketerName": "Osama Ali",
+      "marketerEmail": "osama@masar.com",
+      "courseName": "Python for Data Science",
+      "commissionRate": 10,
+      "createdAt": "2026-02-01T10:00:00Z"
+    },
+    {
+      "id": "edf8",
+      "courseId": "1",
+      "instructorId": "1",
+      "marketerId": "62d2",
+      "marketerName": "ًWaleed Ahmed",
+      "marketerEmail": "waleed@masar.com",
+      "courseName": "Python for Data Science",
+      "commissionRate": 10,
+      "createdAt": "2026-02-25T19:44:23.707Z"
+    }
+  ],
+  "qaItems": [
+    {
+      "id": "1",
+      "instructorId": 1,
+      "sender": "Rania Hassan",
+      "anon": false,
+      "course": "Python for Data Science",
+      "question": "Do I need a powerful laptop for the labs?",
+      "time": "1 hour ago",
+      "answer": null
+    },
+    {
+      "id": "2",
+      "instructorId": 1,
+      "sender": "Anonymous",
+      "anon": true,
+      "course": "Machine Learning Fundamentals",
+      "question": "Is linear algebra required before joining?",
+      "time": "3 hours ago",
+      "answer": null
+    },
+    {
+      "id": "3",
+      "instructorId": 1,
+      "sender": "Kamal Ibrahim",
+      "anon": false,
+      "course": "Python for Data Science",
+      "question": "Will there be recorded sessions if I miss a class?",
+      "time": "1 day ago",
+      "answer": "Yes, all sessions are recorded and uploaded within 24 hours to the course WhatsApp group."
+    },
+    {
+      "id": "4",
+      "instructorId": 1,
+      "sender": "Nour Abdallah",
+      "anon": false,
+      "course": "Machine Learning Fundamentals",
+      "question": "What's the best way to prepare before the course starts?",
+      "time": "2 days ago",
+      "answer": "Review basic Python and linear algebra fundamentals. I'll share a prep guide a week before we start."
+    }
+  ]
+}
