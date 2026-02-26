@@ -1,90 +1,250 @@
 /**
  * @file api.js
- * @description طبقة الـ API للتواصل مع json-server
+ * @description طبقة البيانات — تستخدم Supabase بدلاً من json-server
  *
- * كل الطلبات تذهب إلى /api/* والـ Vite proxy يحوّلها إلى http://localhost:3001/*
+ * جميع أسماء الدوال هي نفسها كما كانت، لذلك لا حاجة لتغيير أي مكوّن.
+ * يتم تحويل أسماء الحقول تلقائياً: snake_case (قاعدة البيانات) ↔ camelCase (المكوّنات)
  */
 
-const BASE = "/api";
+import { supabase } from "./supabase";
 
-const request = async (method, path, data) => {
-  const res = await fetch(`${BASE}${path}`, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : undefined,
-    body: data ? JSON.stringify(data) : undefined,
-  });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  if (res.status === 204) return null;
-  return res.json();
+// ── Case converters ──────────────────────────────────────────────────────────
+
+/** snake_case → camelCase (for rows coming FROM the database) */
+const toCamel = (obj) => {
+  if (!obj || typeof obj !== "object") return obj;
+  if (Array.isArray(obj)) return obj.map(toCamel);
+  return Object.fromEntries(
+    Object.entries(obj).map(([k, v]) => [
+      k.replace(/_([a-z])/g, (_, c) => c.toUpperCase()),
+      v && typeof v === "object" && !Array.isArray(v) ? toCamel(v) : v,
+    ])
+  );
 };
 
-const get   = (path)       => request("GET",    path);
-const post  = (path, data) => request("POST",   path, data);
-const patch = (path, data) => request("PATCH",  path, data);
-const del   = (path)       => request("DELETE", path);
+/** camelCase → snake_case (for data going TO the database) */
+const toSnake = (obj) => {
+  if (!obj || typeof obj !== "object") return obj;
+  if (Array.isArray(obj)) return obj.map(toSnake);
+  return Object.fromEntries(
+    Object.entries(obj).map(([k, v]) => [
+      k.replace(/([A-Z])/g, "_$1").toLowerCase(),
+      v,
+    ])
+  );
+};
+
+/** Throw on Supabase error */
+const check = ({ data, error }) => {
+  if (error) throw new Error(error.message);
+  return toCamel(data);
+};
+
+// ── API ──────────────────────────────────────────────────────────────────────
 
 export const api = {
-  // ── Users / Auth ────────────────────────────────────────
-  /** العثور على مستخدم بالإيميل */
-  findByEmail: (email) => get(`/users?email=${encodeURIComponent(email)}`),
-  /** إنشاء حساب جديد */
-  createUser: (userData) => post("/users", userData),
 
-  // ── Instructor Courses ──────────────────────────────────
+  // ── Instructor Courses ──────────────────────────────────────────────────
   /** جلب كورسات مدرب معين */
-  getCourses: (instructorId) => get(`/instructorCourses?instructorId=${instructorId}`),
+  getCourses: (instructorId) =>
+    supabase
+      .from("instructor_courses")
+      .select("*")
+      .eq("instructor_id", instructorId)
+      .order("created_at", { ascending: false })
+      .then(check),
+
   /** إضافة كورس جديد */
-  createCourse: (course) => post("/instructorCourses", course),
+  createCourse: (course) =>
+    supabase
+      .from("instructor_courses")
+      .insert(toSnake(course))
+      .select()
+      .single()
+      .then(check),
+
   /** تعديل كورس */
-  updateCourse: (id, updates) => patch(`/instructorCourses/${id}`, updates),
+  updateCourse: (id, updates) =>
+    supabase
+      .from("instructor_courses")
+      .update(toSnake(updates))
+      .eq("id", id)
+      .select()
+      .single()
+      .then(check),
+
   /** حذف كورس */
-  deleteCourse: (id) => del(`/instructorCourses/${id}`),
+  deleteCourse: (id) =>
+    supabase
+      .from("instructor_courses")
+      .delete()
+      .eq("id", id)
+      .then(({ error }) => { if (error) throw new Error(error.message); }),
 
-  // ── Enrollment Requests ─────────────────────────────────
+  // ── Enrollment Requests ─────────────────────────────────────────────────
   /** جلب طلبات التسجيل لمدرب معين */
-  getRequests: (instructorId) => get(`/enrollmentRequests?instructorId=${instructorId}`),
+  getRequests: (instructorId) =>
+    supabase
+      .from("enrollment_requests")
+      .select("*")
+      .eq("instructor_id", instructorId)
+      .order("created_at", { ascending: false })
+      .then(check),
+
   /** إضافة طلب تسجيل جديد */
-  createRequest: (req) => post("/enrollmentRequests", req),
-  /** تحديث حالة طلب (قبول / رفض) */
-  updateRequest: (id, updates) => patch(`/enrollmentRequests/${id}`, updates),
+  createRequest: (req) =>
+    supabase
+      .from("enrollment_requests")
+      .insert(toSnake(req))
+      .select()
+      .single()
+      .then(check),
 
-  // ── Q&A Items ───────────────────────────────────────────
+  /** تحديث حالة طلب */
+  updateRequest: (id, updates) =>
+    supabase
+      .from("enrollment_requests")
+      .update(toSnake(updates))
+      .eq("id", id)
+      .select()
+      .single()
+      .then(check),
+
+  // ── Q&A Items ───────────────────────────────────────────────────────────
   /** جلب أسئلة مدرب معين */
-  getQA: (instructorId) => get(`/qaItems?instructorId=${instructorId}`),
+  getQA: (instructorId) =>
+    supabase
+      .from("qa_items")
+      .select("*")
+      .eq("instructor_id", instructorId)
+      .order("created_at", { ascending: true })
+      .then(check),
+
   /** الرد على سؤال */
-  replyQA: (id, answer) => patch(`/qaItems/${id}`, { answer }),
+  replyQA: (id, answer) =>
+    supabase
+      .from("qa_items")
+      .update({ answer })
+      .eq("id", id)
+      .select()
+      .single()
+      .then(check),
 
-  // ── Course Views ─────────────────────────────────────────
+  // ── Course Views ─────────────────────────────────────────────────────────
   /** جلب مشاهدات كورس معين */
-  getCourseViews: (courseId) => get(`/courseViews?courseId=${courseId}`),
-  /** جلب كل المشاهدات */
-  getAllCourseViews: () => get("/courseViews"),
-  /** تسجيل مشاهدة جديدة */
-  createView: (data) => post("/courseViews", data),
+  getCourseViews: (courseId) =>
+    supabase
+      .from("course_views")
+      .select("*")
+      .eq("course_id", courseId)
+      .then(check),
 
-  // ── Marketers ────────────────────────────────────────────
+  /** جلب كل المشاهدات */
+  getAllCourseViews: () =>
+    supabase
+      .from("course_views")
+      .select("*")
+      .then(check),
+
+  /** تسجيل مشاهدة جديدة */
+  createView: (data) =>
+    supabase
+      .from("course_views")
+      .insert(toSnake(data))
+      .then(({ error }) => { if (error) throw new Error(error.message); }),
+
+  // ── Marketers ────────────────────────────────────────────────────────────
   /** جلب كل المسوقين المسجلين */
-  getMarketers: () => get("/users?role=marketer"),
+  getMarketers: () =>
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("role", "marketer")
+      .then(check),
+
   /** جلب تعيينات المسوقين لمدرب معين */
-  getMarketerAssignments: (instructorId) => get(`/marketerAssignments?instructorId=${instructorId}`),
+  getMarketerAssignments: (instructorId) =>
+    supabase
+      .from("marketer_assignments")
+      .select("*")
+      .eq("instructor_id", instructorId)
+      .order("created_at", { ascending: false })
+      .then(check),
+
   /** جلب تعيينات مسوق معين */
-  getMyAssignments: (marketerId) => get(`/marketerAssignments?marketerId=${marketerId}`),
+  getMyAssignments: (marketerId) =>
+    supabase
+      .from("marketer_assignments")
+      .select("*")
+      .eq("marketer_id", marketerId)
+      .then(check),
+
   /** تعيين مسوق لكورس */
-  createAssignment: (data) => post("/marketerAssignments", data),
+  createAssignment: (data) =>
+    supabase
+      .from("marketer_assignments")
+      .insert(toSnake(data))
+      .select()
+      .single()
+      .then(check),
+
   /** حذف تعيين مسوق */
-  deleteAssignment: (id) => del(`/marketerAssignments/${id}`),
+  deleteAssignment: (id) =>
+    supabase
+      .from("marketer_assignments")
+      .delete()
+      .eq("id", id)
+      .then(({ error }) => { if (error) throw new Error(error.message); }),
+
   /** جلب طلبات التسجيل المرتبطة بمسوق معين */
-  getMarketerRequests: (marketerId) => get(`/enrollmentRequests?marketerId=${marketerId}`),
+  getMarketerRequests: (marketerId) =>
+    supabase
+      .from("enrollment_requests")
+      .select("*")
+      .eq("marketer_id", marketerId)
+      .order("created_at", { ascending: false })
+      .then(check),
 
   // ── Admin — Full Data Access ─────────────────────────────────────────────
   /** جلب كل المستخدمين */
-  getAllUsers:    ()        => get("/users"),
+  getAllUsers: () =>
+    supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: true })
+      .then(check),
+
   /** تحديث بيانات مستخدم */
-  updateUser:    (id, upd) => patch(`/users/${id}`, upd),
-  /** حذف مستخدم */
-  deleteUser:    (id)      => del(`/users/${id}`),
+  updateUser: (id, upd) =>
+    supabase
+      .from("profiles")
+      .update(toSnake(upd))
+      .eq("id", id)
+      .select()
+      .single()
+      .then(check),
+
+  /** حذف مستخدم (يحذف الـ profile فقط — لا يستطيع تسجيل الدخول بعدها) */
+  deleteUser: (id) =>
+    supabase
+      .from("profiles")
+      .delete()
+      .eq("id", id)
+      .then(({ error }) => { if (error) throw new Error(error.message); }),
+
   /** جلب كل الكورسات من كل المدربين */
-  getAllCourses:  ()        => get("/instructorCourses"),
+  getAllCourses: () =>
+    supabase
+      .from("instructor_courses")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .then(check),
+
   /** جلب كل طلبات التسجيل */
-  getAllRequests: ()        => get("/enrollmentRequests"),
+  getAllRequests: () =>
+    supabase
+      .from("enrollment_requests")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .then(check),
 };

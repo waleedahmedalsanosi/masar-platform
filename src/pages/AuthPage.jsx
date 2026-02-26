@@ -1,6 +1,17 @@
 import { useState } from "react";
-import { api } from "../services/api";
+import { supabase } from "../services/supabase";
 import { useSettings } from "../contexts/SettingsContext";
+
+/** snake_case → camelCase */
+const toCamel = (obj) => {
+  if (!obj || typeof obj !== "object") return obj;
+  return Object.fromEntries(
+    Object.entries(obj).map(([k, v]) => [
+      k.replace(/_([a-z])/g, (_, c) => c.toUpperCase()),
+      v,
+    ])
+  );
+};
 
 function AuthPage({ mode, setPage, onLogin }) {
   const { t } = useSettings();
@@ -21,6 +32,13 @@ function AuthPage({ mode, setPage, onLogin }) {
     { key: "center",     label: t("auth.center"),     icon: "🏢" },
   ];
 
+  const routeForRole = (r) =>
+    r === "instructor" ? "inst-dashboard"
+    : r === "center"   ? "center-dashboard"
+    : r === "marketer" ? "marketer-dashboard"
+    : r === "admin"    ? "admin-dashboard"
+    : "dashboard";
+
   const handleSubmit = async () => {
     if (!email || !password) { setError(t("auth.fillFields")); return; }
     if (!isLogin && !name)   { setError(t("auth.enterName")); return; }
@@ -29,26 +47,53 @@ function AuthPage({ mode, setPage, onLogin }) {
 
     try {
       if (isLogin) {
-        const users = await api.findByEmail(email);
-        if (!users || users.length === 0) { setError(t("auth.noAccount")); return; }
-        const found = users[0];
-        if (found.password !== password) { setError(t("auth.wrongPassword")); return; }
-        const { password: _p, ...safeUser } = found;
+        // ── Sign In via Supabase Auth ────────────────────────────────────
+        const { data, error: authErr } = await supabase.auth.signInWithPassword({ email, password });
+        if (authErr) {
+          setError(authErr.message.includes("Invalid") ? t("auth.wrongPassword") : t("auth.noAccount"));
+          return;
+        }
+        const { data: profile, error: profileErr } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", data.user.id)
+          .single();
+        if (profileErr || !profile) { setError(t("auth.noAccount")); return; }
+        const safeUser = { id: data.user.id, email: data.user.email, ...toCamel(profile) };
         onLogin(safeUser);
-        setPage(safeUser.role === "instructor" ? "inst-dashboard" : safeUser.role === "center" ? "center-dashboard" : safeUser.role === "marketer" ? "marketer-dashboard" : safeUser.role === "admin" ? "admin-dashboard" : "dashboard");
+        setPage(routeForRole(safeUser.role));
+
       } else {
-        const existing = await api.findByEmail(email);
-        if (existing && existing.length > 0) { setError(t("auth.emailExists")); return; }
-        const newUser = await api.createUser({
-          name, email, password, role,
+        // ── Sign Up via Supabase Auth ────────────────────────────────────
+        const { data, error: authErr } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              name,
+              role,
+              specialization: spec || "Tech & Programming",
+              centerName: centerName || null,
+            },
+          },
+        });
+        if (authErr) {
+          setError(authErr.message.includes("already") ? t("auth.emailExists") : t("auth.serverError"));
+          return;
+        }
+        // Profile auto-created by DB trigger (handle_new_user)
+        const safeUser = {
+          id: data.user.id,
+          email,
+          name,
+          role,
           specialization: spec || "Tech & Programming",
           centerName: centerName || null,
-        });
-        const { password: _p, ...safeUser } = newUser;
+        };
         onLogin(safeUser);
-        setPage(role === "instructor" ? "inst-dashboard" : role === "center" ? "center-dashboard" : role === "marketer" ? "marketer-dashboard" : role === "admin" ? "admin-dashboard" : "dashboard");
+        setPage(routeForRole(role));
       }
-    } catch (err) {
+    } catch {
       setError(t("auth.serverError"));
     } finally {
       setLoading(false);
