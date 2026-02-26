@@ -12,6 +12,7 @@
 
 import { useState } from "react";
 import { ENROLLMENT_FIELDS } from "../data/constants";
+import { useSettings } from "../contexts/SettingsContext";
 
 /**
  * نافذة إضافة كورس جديد
@@ -20,12 +21,13 @@ import { ENROLLMENT_FIELDS } from "../data/constants";
  * @param {Function} props.onSave - callback يُستدعى عند حفظ الكورس مع بياناته
  */
 function AddCourseModal({ onClose, onSave }) {
+  const { t } = useSettings();
   const STEPS = [
-    { key:1, label:"Basics",     icon:"📋" },
-    { key:2, label:"Schedule",   icon:"🗓" },
-    { key:3, label:"Enrollment", icon:"📝" },
-    { key:4, label:"Content",    icon:"📚" },
-    { key:5, label:"Review",     icon:"🚀" },
+    { key:1, label:t("acm.step1"), icon:"📋" },
+    { key:2, label:t("acm.step2"), icon:"🗓" },
+    { key:3, label:t("acm.step3"), icon:"📝" },
+    { key:4, label:t("acm.step4"), icon:"📚" },
+    { key:5, label:t("acm.step5"), icon:"🚀" },
   ];
 
   const emojis = ["📚","🐍","🌐","🤖","🎨","🗄️","📊","⚡","📱","☁️","🔧","🧠"];
@@ -106,7 +108,7 @@ function AddCourseModal({ onClose, onSave }) {
   const WizardBar = () => (
     <div style={{marginBottom:"1.5rem"}}>
       <div style={{display:"flex",justifyContent:"space-between",fontSize:"0.72rem",color:"var(--text3)",marginBottom:"0.4rem"}}>
-        <span>Step {step} of 5</span>
+        <span>{t("enroll.stepOf", { current: step, total: 5 })}</span>
         <span style={{color:"var(--indigo-light)",fontWeight:600}}>{STEPS[step-1].label}</span>
       </div>
       <div style={{height:4,background:"var(--border2)",borderRadius:100,overflow:"hidden"}}>
@@ -130,11 +132,10 @@ function AddCourseModal({ onClose, onSave }) {
       <div className="add-course-modal">
         <div className="acm-body" style={{textAlign:"center",padding:"2.5rem 1.5rem"}}>
           <div style={{fontSize:"3.5rem",marginBottom:"1rem",animation:"bounceIn 0.5s ease"}}>🎉</div>
-          <div style={{fontFamily:"Syne,sans-serif",fontWeight:800,fontSize:"1.25rem",marginBottom:"0.5rem"}}>Course Created!</div>
+          <div style={{fontFamily:"Syne,sans-serif",fontWeight:800,fontSize:"1.25rem",marginBottom:"0.5rem"}}>{t("acm.created")}</div>
           <div style={{fontSize:"0.875rem",color:"var(--text2)",lineHeight:1.7,marginBottom:"1.5rem"}}>
-            <strong style={{color:"var(--text)"}}>{form.title}</strong> has been saved as a{" "}
-            <span style={{color:"#fbbf24",fontWeight:600}}>Draft</span>.<br/>
-            Review it in <strong>My Courses</strong> and publish when ready.
+            <strong style={{color:"var(--text)"}}>{form.title}</strong> {t("acm.savedAsDraft")}<br/>
+            {t("acm.reviewInMyCourses")}
           </div>
           <div style={{background:"var(--bg3)",borderRadius:12,padding:"1rem",marginBottom:"1.5rem",textAlign:"left"}}>
             <div style={{display:"flex",gap:"0.75rem",alignItems:"center",marginBottom:"0.75rem"}}>
@@ -147,13 +148,13 @@ function AddCourseModal({ onClose, onSave }) {
             </div>
             {form.weeks.filter(w=>w.title).length>0 && (
               <div style={{fontSize:"0.78rem",color:"var(--text3)"}}>
-                📚 {form.weeks.filter(w=>w.title).length} weeks · 📅 Starts {form.startDate||"TBD"}
+                📚 {form.weeks.filter(w=>w.title).length} {t("acm.weeksLabel")} · 📅 {t("acm.startsLabel")} {form.startDate||"TBD"}
               </div>
             )}
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0.75rem"}}>
-            <button className="btn btn-ghost" style={BtnStyle} onClick={onClose}>Done</button>
-            <button className="btn btn-primary" style={BtnStyle} onClick={onClose}>Go to My Courses →</button>
+            <button className="btn btn-ghost" style={BtnStyle} onClick={onClose}>{t("enroll.done")}</button>
+            <button className="btn btn-primary" style={BtnStyle} onClick={onClose}>{t("acm.goMyCourses")} →</button>
           </div>
         </div>
       </div>
@@ -167,8 +168,8 @@ function AddCourseModal({ onClose, onSave }) {
         {/* Header */}
         <div className="acm-header">
           <div>
-            <div className="acm-title">{["","Course Basics","Schedule & Delivery","Enrollment Form","Course Content","Review & Publish"][step]}</div>
-            <div className="acm-sub">{["","Icon, title, price, and description","Dates, timing, and access links","What info to collect from students","Weekly curriculum","Final check before saving"][step]}</div>
+            <div className="acm-title">{["",t("acm.h1"),t("acm.h2"),t("acm.h3"),t("acm.h4"),t("acm.h5")][step]}</div>
+            <div className="acm-sub">{["",t("acm.s1"),t("acm.s2"),t("acm.s3"),t("acm.s4"),t("acm.s5")][step]}</div>
           </div>
           <button className="em-close" onClick={onClose}>✕</button>
         </div>
@@ -180,7 +181,7 @@ function AddCourseModal({ onClose, onSave }) {
           {step===1 && (
             <>
               <div className="form-group">
-                <label className="form-label">Course Icon</label>
+                <label className="form-label">{t("ecm.courseIcon")}</label>
                 <div style={{display:"flex",gap:"0.4rem",flexWrap:"wrap"}}>
                   {emojis.map(e=>(
                     <div key={e} onClick={()=>set("image",e)}
@@ -192,20 +193,20 @@ function AddCourseModal({ onClose, onSave }) {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Course Title *</label>
-                <input className={`form-input ${errors.title?"input-error":""}`} placeholder="e.g. Python for Data Science" value={form.title} onChange={e=>set("title",e.target.value)} />
+                <label className="form-label">{t("acm.courseTitle")} *</label>
+                <input className={`form-input ${errors.title?"input-error":""}`} placeholder={t("acm.courseTitlePlaceholder")} value={form.title} onChange={e=>set("title",e.target.value)} />
                 {errors.title && <div style={{fontSize:"0.72rem",color:"#f87171",marginTop:"0.25rem"}}>⚠ {errors.title}</div>}
               </div>
 
               <div className="acm-row">
                 <div className="form-group">
-                  <label className="form-label">Category</label>
+                  <label className="form-label">{t("acm.category")}</label>
                   <select className="acm-select" value={form.category} onChange={e=>set("category",e.target.value)}>
                     {["Data Science","Programming","Computer Science","Design","Other"].map(c=><option key={c}>{c}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Level</label>
+                  <label className="form-label">{t("acm.level")}</label>
                   <select className="acm-select" value={form.level} onChange={e=>set("level",e.target.value)}>
                     {["Beginner","Intermediate","Advanced"].map(l=><option key={l}>{l}</option>)}
                   </select>
@@ -214,13 +215,13 @@ function AddCourseModal({ onClose, onSave }) {
 
               <div className="acm-row">
                 <div className="form-group">
-                  <label className="form-label">Price (USD) *</label>
-                  <input className={`form-input ${errors.price?"input-error":""}`} type="number" min="1" placeholder="150" value={form.price} onChange={e=>set("price",e.target.value)} />
+                  <label className="form-label">{t("acm.price")} *</label>
+                  <input className={`form-input ${errors.price?"input-error":""}`} type="number" min="1" placeholder={t("acm.pricePlaceholder")} value={form.price} onChange={e=>set("price",e.target.value)} />
                   {errors.price && <div style={{fontSize:"0.72rem",color:"#f87171",marginTop:"0.25rem"}}>⚠ {errors.price}</div>}
                   {form.price>0 && <div style={{fontSize:"0.72rem",color:"var(--text3)",marginTop:"0.25rem"}}>≈ SDG {(form.price*350).toLocaleString()}</div>}
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Delivery Mode</label>
+                  <label className="form-label">{t("acm.mode")}</label>
                   <select className="acm-select" value={form.mode} onChange={e=>set("mode",e.target.value)}>
                     {[["online","🟢 Online"],["in-person","🟡 In-Person"],["hybrid","🔵 Hybrid"]].map(([v,l])=><option key={v} value={v}>{l}</option>)}
                   </select>
@@ -228,14 +229,14 @@ function AddCourseModal({ onClose, onSave }) {
               </div>
 
               <div className="form-group">
-                <label className="form-label">About this Course *</label>
-                <textarea className={`acm-textarea ${errors.description?"input-error":""}`} rows={3} placeholder="What will students learn? Who is it for? What makes it unique?" value={form.description} onChange={e=>set("description",e.target.value)} />
+                <label className="form-label">{t("acm.description")} *</label>
+                <textarea className={`acm-textarea ${errors.description?"input-error":""}`} rows={3} placeholder={t("acm.descPlaceholder")} value={form.description} onChange={e=>set("description",e.target.value)} />
                 {errors.description && <div style={{fontSize:"0.72rem",color:"#f87171",marginTop:"0.25rem"}}>⚠ {errors.description}</div>}
               </div>
 
               <div className="form-group">
-                <label className="form-label">Tags <span style={{fontWeight:400,color:"var(--text3)"}}>(comma-separated)</span></label>
-                <input className="form-input" placeholder="Python, Pandas, NumPy, Data Analysis" value={form.tags} onChange={e=>set("tags",e.target.value)} />
+                <label className="form-label">{t("acm.tags")}</label>
+                <input className="form-input" placeholder={t("acm.tagsPlaceholder")} value={form.tags} onChange={e=>set("tags",e.target.value)} />
               </div>
             </>
           )}
@@ -245,26 +246,26 @@ function AddCourseModal({ onClose, onSave }) {
             <>
               <div className="acm-row">
                 <div className="form-group">
-                  <label className="form-label">Start Date *</label>
+                  <label className="form-label">{t("acm.startDate")} *</label>
                   <input className={`form-input ${errors.startDate?"input-error":""}`} type="date" value={form.startDate} onChange={e=>set("startDate",e.target.value)} />
                   {errors.startDate && <div style={{fontSize:"0.72rem",color:"#f87171",marginTop:"0.25rem"}}>⚠ {errors.startDate}</div>}
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Enrollment Deadline</label>
+                  <label className="form-label">{t("acm.enrollDeadline")}</label>
                   <input className="form-input" type="date" value={form.enrollDeadline} onChange={e=>set("enrollDeadline",e.target.value)} />
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Duration *</label>
-                <input className={`form-input ${errors.duration?"input-error":""}`} placeholder="e.g. 8 weeks" value={form.duration} onChange={e=>set("duration",e.target.value)} />
+                <label className="form-label">{t("acm.duration")} *</label>
+                <input className={`form-input ${errors.duration?"input-error":""}`} placeholder={t("acm.durationPlaceholder")} value={form.duration} onChange={e=>set("duration",e.target.value)} />
                 {errors.duration && <div style={{fontSize:"0.72rem",color:"#f87171",marginTop:"0.25rem"}}>⚠ {errors.duration}</div>}
               </div>
 
               <div style={{marginBottom:"0.75rem"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"0.5rem"}}>
-                  <label className="form-label" style={{margin:0}}>Lecture Days & Times</label>
-                  <button onClick={addDay} style={{fontSize:"0.75rem",color:"var(--indigo-light)",background:"rgba(99,102,241,0.1)",border:"1px solid rgba(99,102,241,0.2)",borderRadius:6,padding:"0.2rem 0.6rem",cursor:"pointer",fontFamily:"DM Sans,sans-serif"}}>+ Add Day</button>
+                  <label className="form-label" style={{margin:0}}>{t("acm.lectureDays")}</label>
+                  <button onClick={addDay} style={{fontSize:"0.75rem",color:"var(--indigo-light)",background:"rgba(99,102,241,0.1)",border:"1px solid rgba(99,102,241,0.2)",borderRadius:6,padding:"0.2rem 0.6rem",cursor:"pointer",fontFamily:"DM Sans,sans-serif"}}>+ {t("acm.addDay")}</button>
                 </div>
                 {form.scheduleDays.map((d,i)=>(
                   <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr auto",gap:"0.5rem",marginBottom:"0.5rem",alignItems:"center"}}>
@@ -284,13 +285,13 @@ function AddCourseModal({ onClose, onSave }) {
 
               {(form.mode==="online"||form.mode==="hybrid") && (
                 <>
-                  <div className="acm-section-title">🔗 Online Access Links</div>
+                  <div className="acm-section-title">🔗 {t("acm.onlineLinks")}</div>
                   <div className="form-group">
-                    <label className="form-label">Zoom / Google Meet Link</label>
+                    <label className="form-label">{t("acm.meetLink")}</label>
                     <input className="form-input" placeholder="https://zoom.us/j/..." value={form.meetLink} onChange={e=>set("meetLink",e.target.value)} />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">WhatsApp / Telegram Group Link</label>
+                    <label className="form-label">{t("acm.groupLink")}</label>
                     <input className="form-input" placeholder="https://chat.whatsapp.com/..." value={form.groupLink} onChange={e=>set("groupLink",e.target.value)} />
                   </div>
                 </>
@@ -298,10 +299,10 @@ function AddCourseModal({ onClose, onSave }) {
 
               {(form.mode==="in-person"||form.mode==="hybrid") && (
                 <>
-                  <div className="acm-section-title">📍 Venue</div>
+                  <div className="acm-section-title">📍 {t("acm.venue")}</div>
                   <div className="form-group">
-                    <label className="form-label">Location / Address</label>
-                    <input className="form-input" placeholder="Street, area, city" value={form.location} onChange={e=>set("location",e.target.value)} />
+                    <label className="form-label">{t("acm.location")}</label>
+                    <input className="form-input" placeholder={t("acm.locationPlaceholder")} value={form.location} onChange={e=>set("location",e.target.value)} />
                   </div>
                 </>
               )}
@@ -312,8 +313,8 @@ function AddCourseModal({ onClose, onSave }) {
           {step===3 && (
             <>
               <div style={{fontSize:"0.82rem",color:"var(--text2)",lineHeight:1.6,marginBottom:"1rem"}}>
-                Choose which information to collect from students during enrollment.{" "}
-                <strong style={{color:"var(--text)"}}>Full Name and Phone are always required.</strong>
+                {t("acm.enrollmentFieldsDesc")}{" "}
+                <strong style={{color:"var(--text)"}}>{t("acm.enrollAlwaysRequired")}</strong>
               </div>
 
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0.5rem",marginBottom:"0.75rem"}}>
@@ -345,7 +346,7 @@ function AddCourseModal({ onClose, onSave }) {
                         <span style={{fontSize:"1rem",flexShrink:0}}>{field.icon}</span>
                         <span style={{fontSize:"0.8rem",fontWeight:isOn?600:400,flex:1,lineHeight:1.3}}>{field.label}</span>
                         {field.locked
-                          ? <span style={{fontSize:"0.62rem",color:"var(--cyan)",fontWeight:700,background:"rgba(6,182,212,0.12)",padding:"0.15rem 0.45rem",borderRadius:4,flexShrink:0}}>FIXED</span>
+                          ? <span style={{fontSize:"0.62rem",color:"var(--cyan)",fontWeight:700,background:"rgba(6,182,212,0.12)",padding:"0.15rem 0.45rem",borderRadius:4,flexShrink:0}}>{t("acm.fixed")}</span>
                           : <div style={{
                               width:16,height:16,borderRadius:"50%",flexShrink:0,
                               background: isOn ? "var(--indigo)" : "transparent",
@@ -371,7 +372,7 @@ function AddCourseModal({ onClose, onSave }) {
                               cursor:"pointer", fontWeight: !isReq ? 700 : 400,
                               fontFamily:"inherit", transition:"all 0.15s",
                             }}>
-                            Optional
+                            {t("acm.optional")}
                           </button>
                           <button
                             onClick={() => setEnrollFieldRequired(field.id, true)}
@@ -383,7 +384,7 @@ function AddCourseModal({ onClose, onSave }) {
                               cursor:"pointer", fontWeight: isReq ? 700 : 400,
                               fontFamily:"inherit", transition:"all 0.15s",
                             }}>
-                            Required ★
+                            {t("acm.required")} ★
                           </button>
                         </div>
                       )}
@@ -391,7 +392,7 @@ function AddCourseModal({ onClose, onSave }) {
                       {/* Always-required label for locked fields */}
                       {isOn && field.locked && (
                         <div style={{borderTop:"1px solid rgba(6,182,212,0.15)",fontSize:"0.7rem",color:"var(--text3)",padding:"0.28rem 0.7rem",textAlign:"center"}}>
-                          Always required
+                          {t("acm.alwaysRequired")}
                         </div>
                       )}
                     </div>
@@ -409,11 +410,11 @@ function AddCourseModal({ onClose, onSave }) {
               }}>
                 <span>📋</span>
                 <span>
-                  <strong style={{color:"var(--text)"}}>{form.enrollmentFields.length}</strong> field{form.enrollmentFields.length!==1?"s":""} selected
+                  <strong style={{color:"var(--text)"}}>{form.enrollmentFields.length}</strong> {t("acm.fieldsSelected")}
                   &nbsp;·&nbsp;
-                  <strong style={{color:"var(--indigo-light)"}}>{form.enrollmentFields.filter(f=>f.required).length}</strong> required
+                  <strong style={{color:"var(--indigo-light)"}}>{form.enrollmentFields.filter(f=>f.required).length}</strong> {t("acm.required")}
                   &nbsp;·&nbsp;
-                  <span style={{color:"var(--text3)"}}>{form.enrollmentFields.filter(f=>!f.required).length} optional</span>
+                  <span style={{color:"var(--text3)"}}>{form.enrollmentFields.filter(f=>!f.required).length} {t("acm.optional")}</span>
                 </span>
               </div>
             </>
@@ -423,14 +424,14 @@ function AddCourseModal({ onClose, onSave }) {
           {step===4 && (
             <>
               <div style={{fontSize:"0.82rem",color:"var(--text2)",lineHeight:1.6,marginBottom:"1rem"}}>
-                Add your weekly curriculum. Students see this on the course page.
+                {t("acm.contentDesc")}
               </div>
               {form.weeks.map((w,i)=>(
                 <div key={i} style={{display:"flex",gap:"0.6rem",marginBottom:"0.6rem",alignItems:"flex-start"}}>
                   <div style={{width:30,height:30,borderRadius:7,background:"rgba(99,102,241,0.12)",color:"var(--indigo-light)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Syne,sans-serif",fontWeight:700,fontSize:"0.75rem",flexShrink:0,marginTop:2}}>W{i+1}</div>
                   <div style={{flex:1,display:"grid",gridTemplateColumns:"1fr 1.5fr",gap:"0.5rem"}}>
-                    <input className="form-input" style={{fontSize:"0.82rem",padding:"0.55rem 0.7rem"}} placeholder={`Week ${i+1} title`} value={w.title} onChange={e=>setWeek(i,"title",e.target.value)} />
-                    <input className="form-input" style={{fontSize:"0.82rem",padding:"0.55rem 0.7rem"}} placeholder="Topics (comma-separated)" value={w.topics} onChange={e=>setWeek(i,"topics",e.target.value)} />
+                    <input className="form-input" style={{fontSize:"0.82rem",padding:"0.55rem 0.7rem"}} placeholder={t("acm.weekTitle", { n: i+1 })} value={w.title} onChange={e=>setWeek(i,"title",e.target.value)} />
+                    <input className="form-input" style={{fontSize:"0.82rem",padding:"0.55rem 0.7rem"}} placeholder={t("acm.weekTopics")} value={w.topics} onChange={e=>setWeek(i,"topics",e.target.value)} />
                   </div>
                   {form.weeks.length>1 && (
                     <button onClick={()=>removeWeek(i)} style={{color:"#f87171",background:"none",border:"none",cursor:"pointer",fontSize:"1rem",lineHeight:1,padding:"0.4rem",marginTop:2}}>✕</button>
@@ -440,7 +441,7 @@ function AddCourseModal({ onClose, onSave }) {
               <button onClick={addWeek} style={{width:"100%",padding:"0.6rem",borderRadius:8,border:"1.5px dashed var(--border2)",background:"transparent",color:"var(--text2)",cursor:"pointer",fontSize:"0.82rem",fontFamily:"DM Sans,sans-serif",marginTop:"0.25rem",transition:"all 0.2s"}}
                 onMouseEnter={e=>{e.target.style.borderColor="var(--indigo)";e.target.style.color="var(--indigo-light)"}}
                 onMouseLeave={e=>{e.target.style.borderColor="var(--border2)";e.target.style.color="var(--text2)"}}>
-                + Add Week
+                + {t("acm.addWeek")}
               </button>
             </>
           )}
@@ -448,7 +449,7 @@ function AddCourseModal({ onClose, onSave }) {
           {/* ── STEP 5: REVIEW ── */}
           {step===5 && (
             <>
-              <div style={{fontSize:"0.85rem",color:"var(--text2)",marginBottom:"1rem"}}>Review everything before saving. You can still edit after publishing.</div>
+              <div style={{fontSize:"0.85rem",color:"var(--text2)",marginBottom:"1rem"}}>{t("acm.reviewDesc")}</div>
 
               {/* Summary card */}
               <div style={{background:"var(--bg3)",border:"1px solid var(--border2)",borderRadius:12,padding:"1.25rem",marginBottom:"1rem"}}>
@@ -465,11 +466,11 @@ function AddCourseModal({ onClose, onSave }) {
                 </div>
 
                 {[
-                  ["📅 Start Date",      form.startDate||"—"],
-                  ["⏱ Duration",        form.duration||"—"],
-                  ["📚 Weeks",          form.weeks.filter(w=>w.title).length + " defined"],
-                  ["🗓 Sessions",       form.scheduleDays.length + " session type(s)"],
-                  ["📋 Enrollment Form", `${form.enrollmentFields.length} fields (${form.enrollmentFields.filter(f=>f.required).length} required)`],
+                  [`📅 ${t("acm.startDate")}`,       form.startDate||"—"],
+                  [`⏱ ${t("acm.duration")}`,         form.duration||"—"],
+                  [`📚 ${t("acm.weeksLabel")}`,       form.weeks.filter(w=>w.title).length + ` ${t("acm.defined")}`],
+                  [`🗓 ${t("acm.sessions")}`,         form.scheduleDays.length + ` ${t("acm.sessionTypes")}`],
+                  [`📋 ${t("acm.enrollmentFields")}`, `${form.enrollmentFields.length} ${t("acm.fieldsLabel")} (${form.enrollmentFields.filter(f=>f.required).length} ${t("acm.required")})`],
                   ...(form.meetLink  ? [["💻 Meet Link","✓ Added"]]  : []),
                   ...(form.groupLink ? [["💬 Group Link","✓ Added"]] : []),
                 ].map(([k,v])=>(
@@ -481,7 +482,7 @@ function AddCourseModal({ onClose, onSave }) {
               </div>
 
               <div style={{background:"rgba(34,197,94,0.06)",border:"1px solid rgba(34,197,94,0.2)",borderRadius:10,padding:"0.875rem",fontSize:"0.82rem",color:"var(--text2)"}}>
-                💡 The course will be saved as a <strong style={{color:"#fbbf24"}}>Draft</strong> — visible only to you until you choose to publish it.
+                💡 {t("acm.draftHint")}
               </div>
             </>
           )}
@@ -489,15 +490,15 @@ function AddCourseModal({ onClose, onSave }) {
 
         <div className="acm-footer">
           <button className="btn btn-ghost" style={BtnStyle} onClick={step===1?onClose:back}>
-            {step===1?"Cancel":"← Back"}
+            {step===1 ? t("ecm.cancel") : `← ${t("common.back")}`}
           </button>
-          <div style={{display:"flex",gap:"0.5rem",marginLeft:"auto"}}>
+          <div style={{display:"flex",gap:"0.5rem",marginInlineStart:"auto"}}>
             {step<5
-              ? <button className="btn btn-primary" style={BtnStyle} onClick={next}>Continue →</button>
+              ? <button className="btn btn-primary" style={BtnStyle} onClick={next}>{t("common.next")} →</button>
               : <>
-                  <button className="btn btn-outline" style={BtnStyle} onClick={()=>{onSave(form);setDone(true);}}>Save as Draft</button>
+                  <button className="btn btn-outline" style={BtnStyle} onClick={()=>{onSave(form);setDone(true);}}>{t("acm.saveDraft")}</button>
                   <button className="btn btn-primary" style={{...BtnStyle,display:"flex",alignItems:"center",gap:"0.4rem"}} onClick={()=>{onSave(form);setDone(true);}}>
-                    🚀 Create Course
+                    🚀 {t("acm.createCourse")}
                   </button>
                 </>
             }

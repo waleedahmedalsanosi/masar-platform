@@ -1,54 +1,73 @@
-/**
- * @file Navbar.jsx
- * @description مكوّن شريط التنقل الرئيسي لمنصة مسار
- *
- * شريط التنقل ثابت في أعلى الصفحة مع:
- * - الشعار الذي يعود للصفحة الرئيسية عند النقر عليه
- * - روابط التنقل بين الصفحات الرئيسية
- * - زرا تسجيل الدخول / الانضمام للزوار
- * - عرض اسم المستخدم وزر الخروج عند تسجيل الدخول
- * - تأثير التمييز (scrolled) عند التمرير للأسفل
- */
-
 import React from "react";
+import { useSettings } from "../contexts/SettingsContext";
 
-/**
- * مكوّن شريط التنقل
- * @param {Object} props
- * @param {string} props.activePage - الصفحة النشطة حالياً
- * @param {Function} props.setPage - دالة التنقل بين الصفحات
- * @param {boolean} props.scrolled - هل تم التمرير للأسفل؟
- * @param {Object|null} props.user - بيانات المستخدم المسجل (أو null)
- * @param {Function} props.onLogout - دالة تسجيل الخروج
- */
 function Navbar({ activePage, setPage, scrolled, user, onLogout }) {
+  const { lang, theme, toggleLang, toggleTheme, t } = useSettings();
   const initials = user ? user.name.split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase() : "";
+
+  const navPages = ["home", "courses", "instructors", "centers"];
+  const navKeys  = { home: "nav.home", courses: "nav.courses", instructors: "nav.instructors", centers: "nav.centers" };
+
+  const dashPage = user?.role === "instructor" ? "inst-dashboard"
+                 : user?.role === "center"     ? "center-dashboard"
+                 : user?.role === "marketer"   ? "marketer-dashboard"
+                 : "dashboard";
+
+  const isDashActive = ["dashboard","inst-dashboard","center-dashboard","marketer-dashboard"].includes(activePage);
+
   return (
     <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
       <div className="nav-logo" onClick={() => setPage("home")}>Masar</div>
+
       <ul className="nav-links">
-        {["home", "courses", "instructors", "centers"].map(p => (
+        {navPages.map(p => (
           <li key={p}>
             <a className={activePage === p ? "active" : ""} onClick={() => setPage(p)}>
-              {p.charAt(0).toUpperCase() + p.slice(1)}
+              {t(navKeys[p])}
             </a>
           </li>
         ))}
-        {user && <li><a className={activePage === "dashboard" || activePage === "inst-dashboard" || activePage === "center-dashboard" ? "active" : ""} onClick={() => setPage(user.role === "instructor" ? "inst-dashboard" : user.role === "center" ? "center-dashboard" : "dashboard")}>My Space</a></li>}
+        {user && (
+          <li>
+            <a className={isDashActive ? "active" : ""} onClick={() => setPage(dashPage)}>
+              {t("nav.myspace")}
+            </a>
+          </li>
+        )}
       </ul>
+
       <div className="nav-actions">
+        {/* ── Settings Toggles ── */}
+        <div className="settings-toggles">
+          <button
+            className="toggle-btn"
+            onClick={toggleTheme}
+            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            <span className="toggle-icon">{theme === "dark" ? "☀️" : "🌙"}</span>
+          </button>
+          <button
+            className="toggle-btn"
+            onClick={toggleLang}
+            title={lang === "en" ? "العربية" : "English"}
+          >
+            {lang === "en" ? "عر" : "EN"}
+          </button>
+        </div>
+
+        {/* ── Auth Buttons ── */}
         {user ? (
           <>
-            <div className="nav-user" onClick={() => setPage(user?.role === "instructor" ? "inst-dashboard" : user?.role === "center" ? "center-dashboard" : "dashboard")}>
+            <div className="nav-user" onClick={() => setPage(dashPage)}>
               <div className="nav-avatar">{initials}</div>
               <span className="nav-username">{user.name.split(" ")[0]}</span>
             </div>
-            <button className="btn btn-ghost" onClick={onLogout}>Sign Out</button>
+            <button className="btn btn-ghost" onClick={onLogout}>{t("nav.signout")}</button>
           </>
         ) : (
           <>
-            <button className="btn btn-ghost" onClick={() => setPage("login")}>Sign In</button>
-            <button className="btn btn-primary" onClick={() => setPage("register")}>Join Free</button>
+            <button className="btn btn-ghost" onClick={() => setPage("login")}>{t("nav.signin")}</button>
+            <button className="btn btn-primary" onClick={() => setPage("register")}>{t("nav.joinfree")}</button>
           </>
         )}
       </div>

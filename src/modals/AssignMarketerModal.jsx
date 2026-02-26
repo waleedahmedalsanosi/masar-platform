@@ -7,8 +7,10 @@
 
 import { useState, useEffect } from "react";
 import { api } from "../services/api";
+import { useSettings } from "../contexts/SettingsContext";
 
 function AssignMarketerModal({ courses, onClose, onSave }) {
+  const { t } = useSettings();
   const [courseId,          setCourseId]          = useState("");
   const [selectedMarketer,  setSelectedMarketer]  = useState(null);
   const [commissionRate,    setCommissionRate]     = useState(10);
@@ -64,8 +66,8 @@ function AssignMarketerModal({ courses, onClose, onSave }) {
         {/* Header */}
         <div style={{ padding:"1.25rem 1.5rem",borderBottom:"1px solid var(--border2)",display:"flex",alignItems:"center",justifyContent:"space-between" }}>
           <div>
-            <div style={{ fontFamily:"Syne,sans-serif",fontWeight:700,fontSize:"1.1rem" }}>📢 Assign Marketer</div>
-            <div style={{ fontSize:"0.78rem",color:"var(--text3)",marginTop:"0.2rem" }}>Select a marketer and set their commission</div>
+            <div style={{ fontFamily:"Syne,sans-serif",fontWeight:700,fontSize:"1.1rem" }}>📢 {t("amm.title")}</div>
+            <div style={{ fontSize:"0.78rem",color:"var(--text3)",marginTop:"0.2rem" }}>{t("amm.subtitle")}</div>
           </div>
           <button onClick={onClose} style={{ background:"var(--bg3)",border:"1px solid var(--border2)",borderRadius:8,width:32,height:32,cursor:"pointer",color:"var(--text2)",fontSize:"1rem",display:"flex",alignItems:"center",justifyContent:"center" }}>✕</button>
         </div>
@@ -74,14 +76,14 @@ function AssignMarketerModal({ courses, onClose, onSave }) {
 
           {/* Course select */}
           <div className="form-group">
-            <label className="form-label">Course</label>
+            <label className="form-label">{t("amm.selectCourse")}</label>
             <select
               className="acm-select"
               value={courseId}
               onChange={e => setCourseId(e.target.value)}
               style={{ width:"100%" }}
             >
-              <option value="">— Select a course —</option>
+              <option value="">— {t("amm.selectCourse")} —</option>
               {courses.map(c => (
                 <option key={c.id} value={c.id}>{c.image} {c.title}</option>
               ))}
@@ -90,7 +92,7 @@ function AssignMarketerModal({ courses, onClose, onSave }) {
 
           {/* Commission rate */}
           <div className="form-group">
-            <label className="form-label">Commission Rate (%)</label>
+            <label className="form-label">{t("amm.commission")}</label>
             <input
               className="form-input"
               type="number"
@@ -108,11 +110,11 @@ function AssignMarketerModal({ courses, onClose, onSave }) {
 
           {/* Marketer search */}
           <div className="form-group">
-            <label className="form-label">Select Marketer</label>
+            <label className="form-label">{t("amm.selectMarketer")}</label>
             <input
               className="form-input"
               type="text"
-              placeholder="Search by name or email..."
+              placeholder={t("common.search")}
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -121,13 +123,13 @@ function AssignMarketerModal({ courses, onClose, onSave }) {
           {/* Marketer list */}
           <div style={{ border:"1px solid var(--border2)",borderRadius:10,marginBottom:"1.25rem",maxHeight:220,overflowY:"auto" }}>
             {loadingMarketers && (
-              <div style={{ textAlign:"center",padding:"1.5rem",color:"var(--text3)",fontSize:"0.82rem" }}>Loading marketers...</div>
+              <div style={{ textAlign:"center",padding:"1.5rem",color:"var(--text3)",fontSize:"0.82rem" }}>{t("amm.loading")}</div>
             )}
             {!loadingMarketers && filtered.length === 0 && (
               <div style={{ textAlign:"center",padding:"2rem",color:"var(--text3)",fontSize:"0.82rem" }}>
                 {marketers.length === 0
-                  ? "No marketers registered yet. Ask marketers to create an account."
-                  : "No results found."}
+                  ? t("amm.noMarketers")
+                  : t("amm.noResults")}
               </div>
             )}
             {filtered.map(m => {
@@ -155,10 +157,10 @@ function AssignMarketerModal({ courses, onClose, onSave }) {
           {/* Preview */}
           {selectedMarketer && selectedCourse && (
             <div style={{ background:"rgba(99,102,241,0.06)",border:"1px solid rgba(99,102,241,0.2)",borderRadius:10,padding:"0.875rem",marginBottom:"1.25rem",fontSize:"0.82rem",lineHeight:1.8 }}>
-              <strong style={{ color:"var(--text)" }}>📋 Assignment Preview</strong><br />
+              <strong style={{ color:"var(--text)" }}>📋 {t("amm.preview")}</strong><br />
               <span style={{ color:"var(--text2)" }}>
-                <strong>{selectedMarketer.name}</strong> will market <strong>{selectedCourse.image} {selectedCourse.title}</strong><br />
-                Commission: <strong style={{ color:"var(--cyan)" }}>{commissionRate}%</strong> = SDG {commissionPerStudent.toLocaleString()} per student
+                <strong>{selectedMarketer.name}</strong> {t("amm.willMarket")} <strong>{selectedCourse.image} {selectedCourse.title}</strong><br />
+                {t("amm.commission")}: <strong style={{ color:"var(--cyan)" }}>{commissionRate}%</strong> = SDG {commissionPerStudent.toLocaleString()} {t("amm.perStudent")}
               </span>
             </div>
           )}
@@ -170,7 +172,7 @@ function AssignMarketerModal({ courses, onClose, onSave }) {
               style={{ flex:1,padding:"0.875rem",borderRadius:10 }}
               onClick={onClose}
             >
-              Cancel
+              {t("amm.cancel")}
             </button>
             <button
               className="btn btn-primary"
@@ -178,7 +180,7 @@ function AssignMarketerModal({ courses, onClose, onSave }) {
               disabled={!courseId || !selectedMarketer || loading}
               onClick={handleSave}
             >
-              {loading ? "Saving..." : "Assign Marketer →"}
+              {loading ? t("amm.loading") : `${t("amm.assign")} →`}
             </button>
           </div>
 

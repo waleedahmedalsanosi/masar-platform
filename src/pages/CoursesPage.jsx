@@ -1,25 +1,18 @@
-/**
- * @file CoursesPage.jsx
- * @description صفحة استعراض جميع الكورسات مع إمكانية الفلترة
- *
- * توفر هذه الصفحة:
- * - عرض جميع الكورسات المتاحة على المنصة
- * - فلترة الكورسات حسب التصنيف (All, Data Science, Programming, Design, Computer Science)
- * - شبكة عرض متجاوبة للكورسات
- */
-
 import { useState } from "react";
 import CourseCard from "../components/CourseCard";
 import Footer from "../components/Footer";
 import { COURSES } from "../data";
+import { useSettings } from "../contexts/SettingsContext";
 
-/**
- * صفحة الكورسات
- * @param {Object} props
- * @param {Function} props.setPage - دالة التنقل لصفحة تفاصيل الكورس
- */
 function CoursesPage({ setPage }) {
-  const categories = ["All", "Data Science", "Programming", "Computer Science", "Design"];
+  const { t } = useSettings();
+  const categories = [
+    { key: "All",              label: () => t("courses.all") },
+    { key: "Data Science",     label: () => t("courses.datascience") },
+    { key: "Programming",      label: () => t("courses.programming") },
+    { key: "Computer Science", label: () => t("courses.cs") },
+    { key: "Design",           label: () => t("courses.design") },
+  ];
   const [active, setActive] = useState("All");
   const filtered = active === "All" ? COURSES : COURSES.filter(c => c.category === active);
 
@@ -28,13 +21,15 @@ function CoursesPage({ setPage }) {
       <div style={{ paddingTop: 100 }}>
         <section className="section">
           <div className="section-header">
-            <div className="section-tag">All Courses</div>
-            <h2 className="section-title">Explore 150+ Courses</h2>
-            <p className="section-sub">From beginner to advanced — find your perfect learning path.</p>
+            <div className="section-tag">{t("courses.tag")}</div>
+            <h2 className="section-title">{t("courses.title")}</h2>
+            <p className="section-sub">{t("courses.subtitle")}</p>
           </div>
           <div className="filters">
             {categories.map(c => (
-              <button key={c} className={`filter-btn ${active === c ? "active" : ""}`} onClick={() => setActive(c)}>{c}</button>
+              <button key={c.key} className={`filter-btn ${active === c.key ? "active" : ""}`} onClick={() => setActive(c.key)}>
+                {c.label()}
+              </button>
             ))}
           </div>
           <div className="courses-grid">

@@ -1,20 +1,7 @@
-/**
- * @file DashboardPage.jsx
- * @description لوحة تحكم الطالب
- *
- * تعرض لوحة تحكم الخاصة بالطلاب:
- * - ترحيب شخصي بالمستخدم
- * - ملخص إحصائيات التعلم
- * - قائمة الكورسات الحالية مع شريط التقدم
- * - أزرار الانضمام للاجتماع والمجموعة
- * - قائمة المهام والنشاطات القادمة
- *
- * @note يستخدم بيانات تجريبية (studentData) كـ mock للبيانات الديناميكية
- */
-
 import { useState } from "react";
 import { COURSES } from "../data";
-// ---- STUDENT DASHBOARD ----
+import { useSettings } from "../contexts/SettingsContext";
+
 const studentData = {
   name: "Mohammed Abdallah", role: "Student", specialization: "Data Science & ML",
   interests: ["Python", "Machine Learning", "Data Visualization", "SQL", "Statistics"],
@@ -27,6 +14,7 @@ const studentData = {
 };
 
 function DashboardPage({ user, setPage }) {
+  const { t } = useSettings();
   const displayUser = user || studentData;
   const name = displayUser.name || studentData.name;
   const role = displayUser.role || "Student";
@@ -36,11 +24,18 @@ function DashboardPage({ user, setPage }) {
   const enrolled = studentData.enrolled.map(e => ({ ...COURSES.find(c => c.id === e.id), progress: e.progress }));
   const recommended = studentData.recommended.map(id => COURSES.find(c => c.id === id));
 
+  const quickStats = [
+    ["3",   t("dash.enrolled")],
+    ["1",   t("dash.completed")],
+    ["58%", t("dash.avgProgress")],
+    ["4.8", t("dash.avgRating")],
+  ];
+
   return (
     <div className="dashboard">
       <div className="dash-header">
-        <div className="dash-welcome">Welcome back, {name.split(" ")[0]} 👋</div>
-        <div className="dash-sub">Your personalized learning hub — tailored for {specialization}</div>
+        <div className="dash-welcome">{t("dash.welcome", { name: name.split(" ")[0] })}</div>
+        <div className="dash-sub">{t("dash.subtitle", { specialization })}</div>
       </div>
       <div className="dash-grid">
         <div className="dash-sidebar">
@@ -50,20 +45,25 @@ function DashboardPage({ user, setPage }) {
             <div className="profile-role">{role.charAt(0).toUpperCase() + role.slice(1)}</div>
             <div className="profile-spec">{specialization}</div>
             <div className="profile-progress" style={{ marginTop: "1.25rem" }}>
-              <div className="progress-label"><span style={{ color: "var(--text2)", fontSize: "0.75rem" }}>Overall Progress</span><span style={{ color: "var(--cyan)", fontSize: "0.75rem" }}>58%</span></div>
+              <div className="progress-label">
+                <span style={{ color: "var(--text2)", fontSize: "0.75rem" }}>{t("dash.progress")}</span>
+                <span style={{ color: "var(--cyan)", fontSize: "0.75rem" }}>58%</span>
+              </div>
               <div className="progress-bar"><div className="progress-fill" style={{ width: "58%" }} /></div>
             </div>
           </div>
           <div className="sidebar-card">
-            <div className="sidebar-title">My Interests</div>
+            <div className="sidebar-title">{t("dash.interests")}</div>
             <div>
-              {studentData.interests.map(i => <span key={i} className="interest-tag" style={{cursor:"pointer"}} onClick={()=>setPage&&setPage("courses")} title="Browse this topic">{i}</span>)}
+              {studentData.interests.map(i => (
+                <span key={i} className="interest-tag" style={{cursor:"pointer"}} onClick={()=>setPage&&setPage("courses")} title={t("dash.browse")}>{i}</span>
+              ))}
             </div>
           </div>
           <div className="sidebar-card">
-            <div className="sidebar-title">Quick Stats</div>
+            <div className="sidebar-title">{t("dash.quickStats")}</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-              {[["3", "Enrolled"], ["1", "Completed"], ["58%", "Avg Progress"], ["4.8", "Avg Rating"]].map(([v, l]) => (
+              {quickStats.map(([v, l]) => (
                 <div key={l} style={{ textAlign: "center", padding: "0.75rem", background: "var(--bg)", borderRadius: "10px" }}>
                   <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "1.1rem" }}>{v}</div>
                   <div style={{ fontSize: "0.7rem", color: "var(--text3)" }}>{l}</div>
@@ -75,7 +75,7 @@ function DashboardPage({ user, setPage }) {
 
         <div className="dash-main">
           <div style={{ background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 14, padding: "1.5rem" }}>
-            <div className="dash-section-title">My Courses</div>
+            <div className="dash-section-title">{t("dash.myCourses")}</div>
             <div className="enrolled-list">
               {enrolled.map(c => (
                 <div key={c.id} className="enrolled-card" style={{cursor:"pointer"}} onClick={()=>setPage&&setPage("course-"+c.id)}>
@@ -87,7 +87,7 @@ function DashboardPage({ user, setPage }) {
                       <div className="progress-fill" style={{ width: `${c.progress}%` }} />
                     </div>
                     <div className="enrolled-footer">
-                      <span className="enrolled-progress-text">{c.progress}% complete</span>
+                      <span className="enrolled-progress-text">{t("dash.pctComplete", { progress: c.progress })}</span>
                     </div>
                   </div>
                 </div>
@@ -96,7 +96,7 @@ function DashboardPage({ user, setPage }) {
           </div>
 
           <div style={{ background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 14, padding: "1.5rem" }}>
-            <div className="dash-section-title">Recommended For You</div>
+            <div className="dash-section-title">{t("dash.recommended")}</div>
             <div className="rec-list">
               {recommended.map(c => (
                 <div key={c.id} className="rec-card" style={{cursor:"pointer"}} onClick={()=>setPage&&setPage("course-"+c.id)}>

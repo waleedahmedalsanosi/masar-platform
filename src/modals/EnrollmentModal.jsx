@@ -14,6 +14,7 @@
 import { useState } from "react";
 import { ENROLLMENT_FIELDS } from "../data/constants";
 import { api } from "../services/api";
+import { useSettings } from "../contexts/SettingsContext";
 
 const MOMO_PROVIDERS = [
   { id: "mtn",    icon: "🟡", name: "MTN",    num: "0910-123-456" },
@@ -31,6 +32,7 @@ function buildInitialForm(fields) {
 }
 
 function EnrollmentModal({ course, onClose }) {
+  const { t } = useSettings();
   // الحقول المحددة من المدرب (مع fallback للكورسات القديمة)
   const courseFields = course.enrollmentFields || [
     { id: "fullName", required: true  },
@@ -59,14 +61,14 @@ function EnrollmentModal({ course, onClose }) {
       const def = ENROLLMENT_FIELDS.find(f => f.id === fc.id);
       const val = (form[fc.id] || "").trim();
       if (fc.required && !val) {
-        e[fc.id] = `${def?.label || fc.id} is required`;
+        e[fc.id] = t("enroll.fillRequired");
       }
       // Specific format validation
       if (fc.id === "phone" && val && !/^09\d{8}$/.test(val.replace(/-/g, ""))) {
-        e.phone = "Enter a valid Sudanese number (09xxxxxxxx)";
+        e.phone = t("enroll.invalidPhone");
       }
       if (fc.id === "email" && val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-        e.email = "Enter a valid email address";
+        e.email = t("enroll.invalidEmail");
       }
     });
     setErrors(e);
@@ -101,14 +103,14 @@ function EnrollmentModal({ course, onClose }) {
   const ProgressBar = () => (
     <div style={{marginBottom:"1.5rem"}}>
       <div style={{display:"flex",justifyContent:"space-between",fontSize:"0.72rem",color:"var(--text3)",marginBottom:"0.4rem"}}>
-        <span>Step {Math.max(stepIdx+1,1)} of {totalSteps}</span>
+        <span>{t("enroll.stepOf", { current: Math.max(stepIdx+1,1), total: totalSteps })}</span>
         <span style={{color:"var(--indigo-light)",fontWeight:600}}>
-          {step==="reserve"        && "Your Details"}
-          {step==="payment-choice" && "Payment Method"}
-          {step==="bank"           && "Bank Transfer"}
-          {step==="momo"           && "Mobile Money"}
-          {step==="upload"         && "Upload Receipt"}
-          {step==="done"           && (payLater ? "Reservation Confirmed" : "Enrollment Confirmed")}
+          {step==="reserve"        && t("enroll.stepDetails")}
+          {step==="payment-choice" && t("enroll.stepPayment")}
+          {step==="bank"           && t("enroll.stepBank")}
+          {step==="momo"           && t("enroll.stepMomo")}
+          {step==="upload"         && t("enroll.stepUpload")}
+          {step==="done"           && (payLater ? t("enroll.stepReserved") : t("enroll.stepConfirmed"))}
         </span>
       </div>
       <div style={{height:4,background:"var(--border2)",borderRadius:100,overflow:"hidden"}}>
@@ -130,7 +132,7 @@ function EnrollmentModal({ course, onClose }) {
           {def.icon} {def.label}
           {fc.required
             ? " *"
-            : <span style={{color:"var(--text3)",fontWeight:400}}> (optional)</span>
+            : <span style={{color:"var(--text3)",fontWeight:400}}> ({t("enroll.optional")})</span>
           }
         </label>
 
@@ -160,7 +162,7 @@ function EnrollmentModal({ course, onClose }) {
             onChange={e => setField(fc.id, e.target.value)}
             style={{width:"100%"}}
           >
-            <option value="">— Select —</option>
+            <option value="">— {t("enroll.select")} —</option>
             {def.options.map(opt => <option key={opt}>{opt}</option>)}
           </select>
         )}
@@ -205,7 +207,7 @@ function EnrollmentModal({ course, onClose }) {
           {step === "reserve" && (
             <div>
               <div style={{fontSize:"0.85rem",color:"var(--text2)",marginBottom:"1.25rem",lineHeight:1.6}}>
-                Fill in your details to <strong style={{color:"var(--text)"}}>reserve your seat</strong>. You can pay now or later — your spot is held for <strong style={{color:"var(--cyan)"}}>48 hours</strong>.
+                {t("enroll.reserveDesc")}
               </div>
 
               {/* Dynamic enrollment fields */}
@@ -217,7 +219,7 @@ function EnrollmentModal({ course, onClose }) {
                 <div style={{flex:1}}>
                   <div style={{fontSize:"0.82rem",fontWeight:600,marginBottom:"0.15rem"}}>{course.title}</div>
                   <div style={{fontSize:"0.75rem",color:"var(--text3)"}}>
-                    📅 Starts {course.details?.startDate || "Soon"} &nbsp;·&nbsp; ⏱ {course.duration} &nbsp;·&nbsp; 📶 {course.level}
+                    📅 {t("enroll.starts")} {course.details?.startDate || t("enroll.soon")} &nbsp;·&nbsp; ⏱ {course.duration} &nbsp;·&nbsp; 📶 {course.level}
                   </div>
                 </div>
                 <div style={{fontFamily:"Syne,sans-serif",fontWeight:800,color:"var(--cyan)",fontSize:"1rem",flexShrink:0}}>${course.price}</div>
@@ -227,21 +229,21 @@ function EnrollmentModal({ course, onClose }) {
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0.6rem",marginBottom:"1.25rem"}}>
                 <div onClick={() => setPayLater(false)} style={{padding:"0.875rem",borderRadius:10,border:`1.5px solid ${!payLater?"var(--indigo)":"var(--border2)"}`,background:!payLater?"rgba(99,102,241,0.08)":"var(--bg)",cursor:"pointer",textAlign:"center",transition:"all 0.2s"}}>
                   <div style={{fontSize:"1.25rem",marginBottom:"0.25rem"}}>💳</div>
-                  <div style={{fontWeight:600,fontSize:"0.85rem"}}>Pay Now</div>
-                  <div style={{fontSize:"0.72rem",color:"var(--text3)"}}>Confirm instantly</div>
+                  <div style={{fontWeight:600,fontSize:"0.85rem"}}>{t("enroll.payNow")}</div>
+                  <div style={{fontSize:"0.72rem",color:"var(--text3)"}}>{t("enroll.confirmInstantly")}</div>
                 </div>
                 <div onClick={() => setPayLater(true)} style={{padding:"0.875rem",borderRadius:10,border:`1.5px solid ${payLater?"var(--cyan)":"var(--border2)"}`,background:payLater?"rgba(6,182,212,0.08)":"var(--bg)",cursor:"pointer",textAlign:"center",transition:"all 0.2s"}}>
                   <div style={{fontSize:"1.25rem",marginBottom:"0.25rem"}}>🔖</div>
-                  <div style={{fontWeight:600,fontSize:"0.85rem"}}>Reserve Now</div>
-                  <div style={{fontSize:"0.72rem",color:"var(--text3)"}}>Pay within 48h</div>
+                  <div style={{fontWeight:600,fontSize:"0.85rem"}}>{t("enroll.reserveNow")}</div>
+                  <div style={{fontSize:"0.72rem",color:"var(--text3)"}}>{t("enroll.pay48h")}</div>
                 </div>
               </div>
 
               <button className="btn btn-primary" style={{width:"100%",padding:"0.9rem",borderRadius:10,fontSize:"0.95rem",marginBottom:"0.5rem"}}
                 onClick={() => { if (validate()) setStep(payLater ? "done" : "payment-choice"); }}>
-                {payLater ? "Reserve My Seat →" : "Continue to Payment →"}
+                {payLater ? `${t("enroll.reserveSeat")} →` : `${t("enroll.continuePayment")} →`}
               </button>
-              <div style={{textAlign:"center",fontSize:"0.75rem",color:"var(--text3)"}}>🔒 Your info is safe and never shared</div>
+              <div style={{textAlign:"center",fontSize:"0.75rem",color:"var(--text3)"}}>🔒 {t("enroll.safeInfo")}</div>
             </div>
           )}
 
@@ -249,13 +251,13 @@ function EnrollmentModal({ course, onClose }) {
           {step === "payment-choice" && (
             <div>
               <div style={{fontSize:"0.85rem",color:"var(--text2)",marginBottom:"1rem"}}>
-                Choose your payment method for <strong style={{color:"var(--cyan)"}}>SDG {(course.price * 350).toLocaleString()}</strong> <span style={{color:"var(--text3)"}}>(≈ ${course.price})</span>
+                {t("enroll.choosePayment")} <strong style={{color:"var(--cyan)"}}>SDG {(course.price * 350).toLocaleString()}</strong> <span style={{color:"var(--text3)"}}>(≈ ${course.price})</span>
               </div>
 
               <div className="payment-methods">
                 {[
-                  { id:"bank", icon:"🏦", name:"Bank Transfer",  desc:"Direct bank transfer — most common" },
-                  { id:"momo", icon:"📱", name:"Mobile Money",   desc:"MTN, Zain, or Sudani wallet" },
+                  { id:"bank", icon:"🏦", name:t("enroll.bankTransfer"),  desc:t("enroll.bankDesc") },
+                  { id:"momo", icon:"📱", name:t("enroll.mobileMoney"),   desc:t("enroll.momoDesc") },
                 ].map(m => (
                   <div key={m.id} className={`payment-method ${payMethod===m.id?"selected":""}`} onClick={() => setPayMethod(m.id)}>
                     <span className="pm-icon">{m.icon}</span>
@@ -266,10 +268,10 @@ function EnrollmentModal({ course, onClose }) {
               </div>
 
               <div style={{display:"flex",gap:"0.75rem",marginTop:"1.25rem"}}>
-                <button className="btn btn-ghost" style={{flex:1,padding:"0.875rem",borderRadius:10}} onClick={() => setStep("reserve")}>← Back</button>
+                <button className="btn btn-ghost" style={{flex:1,padding:"0.875rem",borderRadius:10}} onClick={() => setStep("reserve")}>← {t("common.back")}</button>
                 <button className="btn btn-primary" style={{flex:2,padding:"0.875rem",borderRadius:10}} disabled={!payMethod}
                   onClick={() => setStep(payMethod)}>
-                  View Payment Details →
+                  {t("enroll.viewDetails")} →
                 </button>
               </div>
             </div>
@@ -278,33 +280,33 @@ function EnrollmentModal({ course, onClose }) {
           {/* ── STEP: BANK ── */}
           {step === "bank" && (
             <div>
-              <div style={{fontSize:"0.85rem",color:"var(--text2)",marginBottom:"0.75rem"}}>Transfer the exact amount below, then upload your receipt.</div>
+              <div style={{fontSize:"0.85rem",color:"var(--text2)",marginBottom:"0.75rem"}}>{t("enroll.bankInstructions")}</div>
               <div className="bank-box">
-                <div className="bank-box-title">🏦 Transfer to:</div>
+                <div className="bank-box-title">🏦 {t("enroll.transferTo")}:</div>
                 {[
-                  {label:"Bank",          value:"Bank of Khartoum"},
-                  {label:"Account Name",  value:"Masar Training Platform"},
-                  {label:"Account No.",   value:"1234-5678-9012-3456"},
-                  {label:"Amount (SDG)",  value:`SDG ${(course.price*350).toLocaleString()}`},
-                  {label:"Reference",     value:form.phone || refNum},
+                  {label:t("enroll.bank"),        value:"Bank of Khartoum"},
+                  {label:t("enroll.accountName"), value:"Masar Training Platform"},
+                  {label:t("enroll.accountNo"),   value:"1234-5678-9012-3456"},
+                  {label:t("enroll.amountSDG"),   value:`SDG ${(course.price*350).toLocaleString()}`},
+                  {label:t("enroll.reference"),   value:form.phone || refNum},
                 ].map(b => (
                   <div key={b.label} className="bank-row">
                     <span className="bank-label">{b.label}</span>
                     <div style={{display:"flex",gap:"0.5rem",alignItems:"center"}}>
                       <span className="bank-value" style={b.label==="Amount (SDG)"?{color:"var(--cyan)"}:{}}>{b.value}</span>
                       <button className="copy-btn" onClick={() => copyText(b.value, b.label)}>
-                        {copied===b.label ? "✓" : "Copy"}
+                        {copied===b.label ? "✓" : t("enroll.copy")}
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
               <div style={{background:"rgba(251,191,36,0.07)",border:"1px solid rgba(251,191,36,0.2)",borderRadius:10,padding:"0.75rem",fontSize:"0.78rem",color:"var(--text2)",marginBottom:"1rem"}}>
-                💡 Use your phone number <strong>({form.phone || "09xxxxxxxx"})</strong> as the transfer reference so we can match your payment quickly.
+                💡 {t("enroll.phoneRefHint", { phone: form.phone || "09xxxxxxxx" })}
               </div>
               <div style={{display:"flex",gap:"0.75rem"}}>
-                <button className="btn btn-ghost" style={{flex:1,padding:"0.875rem",borderRadius:10}} onClick={() => setStep("payment-choice")}>← Back</button>
-                <button className="btn btn-primary" style={{flex:2,padding:"0.875rem",borderRadius:10}} onClick={() => setStep("upload")}>I've Transferred →</button>
+                <button className="btn btn-ghost" style={{flex:1,padding:"0.875rem",borderRadius:10}} onClick={() => setStep("payment-choice")}>← {t("common.back")}</button>
+                <button className="btn btn-primary" style={{flex:2,padding:"0.875rem",borderRadius:10}} onClick={() => setStep("upload")}>{t("enroll.transferred")} →</button>
               </div>
             </div>
           )}
@@ -312,7 +314,7 @@ function EnrollmentModal({ course, onClose }) {
           {/* ── STEP: MOMO ── */}
           {step === "momo" && (
             <div>
-              <div style={{fontSize:"0.85rem",color:"var(--text2)",marginBottom:"0.75rem"}}>Select your operator and send the amount:</div>
+              <div style={{fontSize:"0.85rem",color:"var(--text2)",marginBottom:"0.75rem"}}>{t("enroll.momoInstructions")}</div>
               <div className="momo-grid">
                 {MOMO_PROVIDERS.map(p => (
                   <div key={p.id} className={`momo-btn ${momoProvider===p.id?"selected":""}`} onClick={() => setMomoProvider(p.id)}>
@@ -323,26 +325,26 @@ function EnrollmentModal({ course, onClose }) {
                 ))}
               </div>
               <div className="bank-box" style={{marginTop:"0.75rem"}}>
-                <div className="bank-box-title">📱 Send to:</div>
+                <div className="bank-box-title">📱 {t("enroll.sendTo")}:</div>
                 {[
-                  {label:"Number",       value: MOMO_PROVIDERS.find(p=>p.id===momoProvider)?.num},
-                  {label:"Amount",       value:`SDG ${(course.price*350).toLocaleString()}`},
-                  {label:"Note/Message", value:`${form.fullName || "Your name"} – ${course.title}`},
+                  {label:t("enroll.number"),     value: MOMO_PROVIDERS.find(p=>p.id===momoProvider)?.num},
+                  {label:t("enroll.amount"),      value:`SDG ${(course.price*350).toLocaleString()}`},
+                  {label:t("enroll.noteMsg"),     value:`${form.fullName || t("enroll.yourName")} – ${course.title}`},
                 ].map(b => (
                   <div key={b.label} className="bank-row">
                     <span className="bank-label">{b.label}</span>
                     <div style={{display:"flex",gap:"0.5rem",alignItems:"center"}}>
-                      <span className="bank-value" style={b.label==="Amount"?{color:"var(--cyan)"}:{}}>{b.value}</span>
+                      <span className="bank-value" style={b.label===t("enroll.amount")?{color:"var(--cyan)"}:{}}>{b.value}</span>
                       <button className="copy-btn" onClick={() => copyText(b.value, b.label)}>
-                        {copied===b.label ? "✓" : "Copy"}
+                        {copied===b.label ? "✓" : t("enroll.copy")}
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
               <div style={{display:"flex",gap:"0.75rem",marginTop:"1rem"}}>
-                <button className="btn btn-ghost" style={{flex:1,padding:"0.875rem",borderRadius:10}} onClick={() => setStep("payment-choice")}>← Back</button>
-                <button className="btn btn-primary" style={{flex:2,padding:"0.875rem",borderRadius:10}} onClick={() => setStep("upload")}>I've Sent It →</button>
+                <button className="btn btn-ghost" style={{flex:1,padding:"0.875rem",borderRadius:10}} onClick={() => setStep("payment-choice")}>← {t("common.back")}</button>
+                <button className="btn btn-primary" style={{flex:2,padding:"0.875rem",borderRadius:10}} onClick={() => setStep("upload")}>{t("enroll.sentIt")} →</button>
               </div>
             </div>
           )}
@@ -351,23 +353,23 @@ function EnrollmentModal({ course, onClose }) {
           {step === "upload" && (
             <div>
               <div style={{fontSize:"0.85rem",color:"var(--text2)",marginBottom:"0.75rem",lineHeight:1.6}}>
-                Upload a <strong>screenshot or photo</strong> of your payment confirmation. Our team reviews receipts within <strong style={{color:"var(--cyan)"}}>2–4 hours</strong>.
+                {t("enroll.uploadDesc")}
               </div>
               <label className={`file-upload-area ${file?"has-file":""}`}>
                 <input type="file" accept="image/*,application/pdf" onChange={e => setFile(e.target.files[0])} />
                 <div className="upload-icon">{file ? "✅" : "📎"}</div>
-                <div className="upload-text">{file ? "Receipt ready!" : "Tap to upload receipt"}</div>
+                <div className="upload-text">{file ? t("enroll.receiptReady") : t("enroll.tapUpload")}</div>
                 {!file && <div className="upload-hint">PNG, JPG, PDF · Max 5MB</div>}
                 {file && <div className="file-chosen">📄 {file.name}</div>}
               </label>
 
               <div style={{marginBottom:"1rem"}}>
-                <label className="form-label">Note to instructor <span style={{color:"var(--text3)",fontWeight:400}}>(optional)</span></label>
-                <textarea className="form-input" rows={2} placeholder="Any questions or special requests before you start..." style={{resize:"none",lineHeight:1.6}} value={form.note || ""} onChange={e => setField("note", e.target.value)} />
+                <label className="form-label">{t("enroll.noteToInstructor")} <span style={{color:"var(--text3)",fontWeight:400}}>({t("enroll.optional")})</span></label>
+                <textarea className="form-input" rows={2} placeholder={t("enroll.notePlaceholder")} style={{resize:"none",lineHeight:1.6}} value={form.note || ""} onChange={e => setField("note", e.target.value)} />
               </div>
 
               <div style={{display:"flex",gap:"0.75rem"}}>
-                <button className="btn btn-ghost" style={{flex:1,padding:"0.875rem",borderRadius:10}} onClick={() => setStep(payMethod)}>← Back</button>
+                <button className="btn btn-ghost" style={{flex:1,padding:"0.875rem",borderRadius:10}} onClick={() => setStep(payMethod)}>← {t("common.back")}</button>
                 <button className="btn btn-primary" style={{flex:2,padding:"0.875rem",borderRadius:10}} disabled={!file}
                   onClick={async () => {
                     // حفظ طلب التسجيل في قاعدة البيانات
@@ -393,7 +395,7 @@ function EnrollmentModal({ course, onClose }) {
                     } catch { /* json-server غير مشغّل، نكمل بدون حفظ */ }
                     setStep("done");
                   }}>
-                  Submit & Confirm →
+                  {t("enroll.submitConfirm")} →
                 </button>
               </div>
             </div>
@@ -403,30 +405,30 @@ function EnrollmentModal({ course, onClose }) {
           {step === "done" && (
             <div className="status-card">
               <div className="status-icon">{payLater ? "🔖" : "🎉"}</div>
-              <div className="status-title">{payLater ? "Seat Reserved!" : "You're In!"}</div>
+              <div className="status-title">{payLater ? t("enroll.seatReserved") : t("enroll.youreIn")}</div>
               <div className={`status-badge ${payLater ? "pending" : "approved"}`}>
-                {payLater ? "⏳ Payment Pending" : "✓ Enrollment Submitted"}
+                {payLater ? `⏳ ${t("enroll.paymentPending")}` : `✓ ${t("enroll.enrollmentSubmitted")}`}
               </div>
               <div className="status-desc">
                 {payLater
-                  ? `Your seat in "${course.title}" is reserved for 48 hours. Complete your payment and upload the receipt to confirm your enrollment.`
-                  : `We received your payment receipt. You'll get a WhatsApp/email confirmation within 2–4 hours. Welcome aboard!`
+                  ? t("enroll.reservedDesc", { title: course.title })
+                  : t("enroll.submittedDesc")
                 }
               </div>
-              <div className="status-ref">Reference No: <span>{refNum}</span></div>
+              <div className="status-ref">{t("enroll.refNo")}: <span>{refNum}</span></div>
 
               {/* Pay Later → show payment reminder */}
               {payLater && (
                 <div style={{background:"rgba(251,191,36,0.07)",border:"1px solid rgba(251,191,36,0.2)",borderRadius:12,padding:"1rem",marginBottom:"1rem",textAlign:"left"}}>
-                  <div style={{fontWeight:600,fontSize:"0.85rem",marginBottom:"0.5rem"}}>⏰ Your 48-hour payment window:</div>
+                  <div style={{fontWeight:600,fontSize:"0.85rem",marginBottom:"0.5rem"}}>⏰ {t("enroll.payWindow")}</div>
                   <div style={{fontSize:"0.82rem",color:"var(--text2)",lineHeight:1.7}}>
-                    1. Transfer <strong style={{color:"var(--cyan)"}}>SDG {(course.price*350).toLocaleString()}</strong> to Masar (Bank of Khartoum or Mobile Money)<br/>
-                    2. Come back to this page and tap <strong>"Complete Payment"</strong><br/>
-                    3. Upload your receipt to confirm your spot
+                    1. {t("enroll.payStep1", { amount: `SDG ${(course.price*350).toLocaleString()}` })}<br/>
+                    2. {t("enroll.payStep2")}<br/>
+                    3. {t("enroll.payStep3")}
                   </div>
                   <button className="btn btn-primary" style={{width:"100%",padding:"0.75rem",borderRadius:10,marginTop:"0.875rem",fontSize:"0.875rem"}}
                     onClick={() => { setPayLater(false); setStep("payment-choice"); }}>
-                    Complete Payment Now →
+                    {t("enroll.completePayment")} →
                   </button>
                 </div>
               )}
@@ -435,26 +437,26 @@ function EnrollmentModal({ course, onClose }) {
               {!payLater && isOnline && (
                 <div className="course-links-section">
                   <div style={{fontSize:"0.75rem",fontWeight:600,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:"0.5rem",textAlign:"left"}}>
-                    Links sent after confirmation:
+                    {t("enroll.linksSentAfter")}:
                   </div>
                   {course.meetLink && (
                     <div className={`course-link-btn ${getLinkType(course.meetLink)}`} style={{opacity:0.6,cursor:"default"}}>
                       <span className="cl-icon">{course.meetLink.includes("zoom")?"💻":"📹"}</span>
                       <div className="cl-text">
-                        <div className="cl-title">{course.meetLink.includes("zoom")?"Zoom Meeting Link":"Google Meet Link"}</div>
-                        <div className="cl-sub">Will be sent after payment is verified</div>
+                        <div className="cl-title">{course.meetLink.includes("zoom")?t("enroll.zoomLink"):t("enroll.meetLink")}</div>
+                        <div className="cl-sub">{t("enroll.sentAfterVerify")}</div>
                       </div>
-                      <span style={{fontSize:"0.72rem",color:"var(--text3)"}}>Pending</span>
+                      <span style={{fontSize:"0.72rem",color:"var(--text3)"}}>{t("enroll.pending")}</span>
                     </div>
                   )}
                   {course.groupLink && (
                     <div className={`course-link-btn ${getLinkType(course.groupLink)}`} style={{opacity:0.6,cursor:"default"}}>
                       <span className="cl-icon">{course.groupLink.includes("whatsapp")?"💬":"✈️"}</span>
                       <div className="cl-text">
-                        <div className="cl-title">{course.groupLink.includes("whatsapp")?"WhatsApp Group":"Telegram Group"}</div>
-                        <div className="cl-sub">Will be sent after payment is verified</div>
+                        <div className="cl-title">{course.groupLink.includes("whatsapp")?t("enroll.whatsappGroup"):t("enroll.telegramGroup")}</div>
+                        <div className="cl-sub">{t("enroll.sentAfterVerify")}</div>
                       </div>
-                      <span style={{fontSize:"0.72rem",color:"var(--text3)"}}>Pending</span>
+                      <span style={{fontSize:"0.72rem",color:"var(--text3)"}}>{t("enroll.pending")}</span>
                     </div>
                   )}
                 </div>
@@ -463,19 +465,19 @@ function EnrollmentModal({ course, onClose }) {
               {/* In-person location always visible */}
               {isInPerson && course.location && (
                 <div className="location-section">
-                  <div style={{fontSize:"0.75rem",fontWeight:600,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:"0.75rem",textAlign:"left"}}>Course Location</div>
+                  <div style={{fontSize:"0.75rem",fontWeight:600,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:"0.75rem",textAlign:"left"}}>{t("enroll.courseLocation")}</div>
                   <div className="map-container">
                     <div className="map-placeholder">
                       <span className="map-pin">📍</span>
                       <div style={{fontSize:"0.8rem",color:"var(--text2)",padding:"0 1rem"}}>{course.location.address}</div>
                     </div>
                   </div>
-                  <a href={course.location?.mapUrl||"https://maps.google.com"} target="_blank" rel="noreferrer" className="map-open-btn" style={{textDecoration:"none",display:"flex",alignItems:"center",gap:"0.75rem"}}><span>🗺️</span> Open in Google Maps</a>
+                  <a href={course.location?.mapUrl||"https://maps.google.com"} target="_blank" rel="noreferrer" className="map-open-btn" style={{textDecoration:"none",display:"flex",alignItems:"center",gap:"0.75rem"}}><span>🗺️</span> {t("enroll.openMaps")}</a>
                 </div>
               )}
 
               <button className="btn btn-ghost" style={{width:"100%",padding:"0.875rem",borderRadius:10,marginTop:"1rem"}} onClick={onClose}>
-                Done
+                {t("enroll.done")}
               </button>
             </div>
           )}

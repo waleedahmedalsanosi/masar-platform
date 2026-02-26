@@ -727,6 +727,64 @@ const styles = `
     .dash-grid { grid-template-columns: 1fr; }
     .hero-stats { gap: 1.5rem; }
   }
+
+  /* ── LIGHT THEME ────────────────────────────────────────────────────────── */
+  [data-theme="light"] {
+    --bg: #f4f4fb;
+    --bg2: #eaeaf5;
+    --bg3: #dcdcf0;
+    --surface: #ffffff;
+    --surface2: #f0f0fa;
+    --border: rgba(99,102,241,0.2);
+    --border2: rgba(0,0,0,0.08);
+    --text: #1a1a2e;
+    --text2: #4a4a6a;
+    --text3: #8080a0;
+  }
+
+  [data-theme="light"] .nav {
+    background: rgba(244,244,251,0.85);
+    border-bottom-color: rgba(99,102,241,0.15);
+  }
+  [data-theme="light"] .nav.scrolled {
+    background: rgba(244,244,251,0.97);
+    box-shadow: 0 4px 20px rgba(99,102,241,0.1);
+  }
+  [data-theme="light"] .modal-overlay {
+    background: rgba(26,26,46,0.5);
+  }
+  [data-theme="light"] ::-webkit-scrollbar-track { background: var(--bg2); }
+
+  /* ── SETTINGS TOGGLES (lang / theme) ────────────────────────────────────── */
+  .settings-toggles {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-inline-end: 0.25rem;
+  }
+  .toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    height: 32px;
+    padding: 0 0.6rem;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--text2);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .toggle-btn:hover {
+    border-color: var(--indigo);
+    color: var(--indigo-light);
+    background: var(--surface2);
+  }
+  .toggle-btn .toggle-icon { font-size: 0.95rem; }
 `;
 
 export default styles;

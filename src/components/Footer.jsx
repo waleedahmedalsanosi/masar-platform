@@ -1,58 +1,46 @@
-/**
- * @file Footer.jsx
- * @description تذييل الصفحة لمنصة مسار
- *
- * يحتوي التذييل على:
- * - شعار المنصة ووصفها
- * - روابط الصفحات الرئيسية
- * - حقوق النشر
- */
-
 import React from "react";
+import { useSettings } from "../contexts/SettingsContext";
 
-/**
- * مكوّن تذييل الصفحة
- * @param {Object} props
- * @param {Function} props.setPage - دالة التنقل بين الصفحات
- */
 function Footer({ setPage }) {
+  const { t } = useSettings();
   return (
     <footer className="footer">
       <div className="footer-grid">
         <div>
           <div className="footer-brand-name">Masar</div>
-          <div className="footer-desc">Sudan's premier platform for tech education — connecting learners with the best training centers and instructors nationwide.</div>
+          <div className="footer-desc">{t("footer.desc")}</div>
         </div>
         <div>
-          <div className="footer-heading">Platform</div>
+          <div className="footer-heading">{t("footer.platform")}</div>
           <ul className="footer-links">
-            {["Courses", "Instructors", "Centers", "About"].map(l => (
-              <li key={l}><a onClick={() => setPage(l.toLowerCase())}>{l}</a></li>
-            ))}
+            <li><a onClick={() => setPage("courses")}>{t("footer.courses")}</a></li>
+            <li><a onClick={() => setPage("instructors")}>{t("footer.instructors")}</a></li>
+            <li><a onClick={() => setPage("centers")}>{t("footer.centers")}</a></li>
+            <li><a onClick={() => setPage("home")}>{t("footer.about")}</a></li>
           </ul>
         </div>
         <div>
-          <div className="footer-heading">For Educators</div>
+          <div className="footer-heading">{t("footer.foreducators")}</div>
           <ul className="footer-links">
-            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("register")}>Teach on Masar</a></li>
-            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("register")}>List Your Center</a></li>
-            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("center-dashboard")}>Center Dashboard</a></li>
-            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("inst-dashboard")}>Instructor Dashboard</a></li>
+            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("register")}>{t("footer.teach")}</a></li>
+            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("register")}>{t("footer.listcenter")}</a></li>
+            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("center-dashboard")}>{t("footer.centerdash")}</a></li>
+            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("inst-dashboard")}>{t("footer.instdash")}</a></li>
           </ul>
         </div>
         <div>
-          <div className="footer-heading">Fields</div>
+          <div className="footer-heading">{t("footer.fields")}</div>
           <ul className="footer-links">
-            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("courses")}>Data Science</a></li>
-            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("courses")}>Programming</a></li>
-            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("courses")}>Computer Science</a></li>
-            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("courses")}>UI/UX Design</a></li>
+            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("courses")}>{t("footer.datascience")}</a></li>
+            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("courses")}>{t("footer.programming")}</a></li>
+            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("courses")}>{t("footer.cs")}</a></li>
+            <li><a style={{cursor:"pointer"}} onClick={()=>setPage("courses")}>{t("footer.uiux")}</a></li>
           </ul>
         </div>
       </div>
       <div className="footer-bottom">
-        <div className="footer-copy">© 2024 Masar. All rights reserved.</div>
-        <div className="footer-made">Built for Sudan 🇸🇩</div>
+        <div className="footer-copy">{t("footer.rights")}</div>
+        <div className="footer-made">{t("footer.builtfor")}</div>
       </div>
     </footer>
   );

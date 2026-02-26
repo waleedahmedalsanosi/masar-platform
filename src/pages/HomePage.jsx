@@ -1,28 +1,12 @@
-/**
- * @file HomePage.jsx
- * @description الصفحة الرئيسية لمنصة مسار
- *
- * تتضمن الصفحة الرئيسية الأقسام التالية:
- * 1. Hero Section - القسم الترحيبي مع العنوان الرئيسي وزرا الدعوة للعمل
- * 2. Stats Section - إحصائيات المنصة (الطلاب، الكورسات، المراكز، المدربين)
- * 3. Featured Courses - أبرز 3 كورسات مميزة
- * 4. Features Section - مميزات المنصة الستة
- * 5. Centers Section - أبرز 3 مراكز تدريبية
- * 6. CTA Section - دعوة للتسجيل
- */
-
 import React from "react";
 import CourseCard from "../components/CourseCard";
 import CenterCard from "../components/CenterCard";
 import Footer from "../components/Footer";
 import { COURSES, CENTERS, STATS, FEATURES } from "../data";
+import { useSettings } from "../contexts/SettingsContext";
 
-/**
- * مكوّن الصفحة الرئيسية
- * @param {Object} props
- * @param {Function} props.setPage - دالة التنقل بين صفحات التطبيق
- */
 function HomePage({ setPage }) {
+  const { t } = useSettings();
   return (
     <>
       {/* HERO */}
@@ -31,13 +15,13 @@ function HomePage({ setPage }) {
         <div className="hero-grid" />
         <div className="hero-content">
           <div className="hero-badge">
-            <span>🇸🇩</span> Sudan's #1 Tech Training Platform
+            <span>🇸🇩</span> {t("home.badge").replace("🇸🇩 ", "")}
           </div>
-          <h1>Learn. Grow.<br /><span>Build Your Future.</span></h1>
-          <p>Masar connects Sudanese learners with the best training centers and instructors in Computer Science, Data Science, and Programming.</p>
+          <h1>{t("home.title").split(". ").slice(0,2).join(". ")}.<br /><span>{t("home.title").split(". ").slice(2).join(". ")}</span></h1>
+          <p>{t("home.subtitle")}</p>
           <div className="hero-actions">
-            <button className="btn btn-primary btn-lg" onClick={() => setPage("courses")}>Explore Courses</button>
-            <button className="btn btn-outline btn-lg" onClick={() => setPage("register")}>Join as Instructor</button>
+            <button className="btn btn-primary btn-lg" onClick={() => setPage("courses")}>{t("home.explore")}</button>
+            <button className="btn btn-outline btn-lg" onClick={() => setPage("register")}>{t("home.joinInstructor")}</button>
           </div>
           <div className="hero-stats">
             {STATS.map(s => (
@@ -53,9 +37,9 @@ function HomePage({ setPage }) {
       {/* FEATURES */}
       <section className="section" style={{ background: "var(--bg2)" }}>
         <div className="section-header">
-          <div className="section-tag">Why Masar?</div>
-          <h2 className="section-title">Everything You Need to Succeed</h2>
-          <p className="section-sub">We built Masar to solve the real problems Sudanese students face when looking for quality tech education.</p>
+          <div className="section-tag">{t("home.whyTag")}</div>
+          <h2 className="section-title">{t("home.whyTitle")}</h2>
+          <p className="section-sub">{t("home.whyDesc")}</p>
         </div>
         <div className="features-grid">
           {FEATURES.map(f => (
@@ -71,24 +55,24 @@ function HomePage({ setPage }) {
       {/* COURSES PREVIEW */}
       <section className="section">
         <div className="section-header">
-          <div className="section-tag">Featured Courses</div>
-          <h2 className="section-title">Start Learning Today</h2>
-          <p className="section-sub">Handpicked courses from verified instructors and centers across Sudan.</p>
+          <div className="section-tag">{t("home.featuredTag")}</div>
+          <h2 className="section-title">{t("home.featuredTitle")}</h2>
+          <p className="section-sub">{t("home.featuredDesc")}</p>
         </div>
         <div className="courses-grid">
           {COURSES.slice(0, 4).map(c => <CourseCard key={c.id} course={c} setPage={setPage} />)}
         </div>
         <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
-          <button className="btn btn-outline btn-lg" onClick={() => setPage("courses")}>View All Courses →</button>
+          <button className="btn btn-outline btn-lg" onClick={() => setPage("courses")}>{t("home.viewAll")}</button>
         </div>
       </section>
 
       {/* CENTERS PREVIEW */}
       <section className="section" style={{ background: "var(--bg2)" }}>
         <div className="section-header">
-          <div className="section-tag">Training Centers</div>
-          <h2 className="section-title">Trusted Institutions</h2>
-          <p className="section-sub">Verified centers with full profiles, transparent data, and proven track records.</p>
+          <div className="section-tag">{t("home.centersTag")}</div>
+          <h2 className="section-title">{t("home.centersTitle")}</h2>
+          <p className="section-sub">{t("home.centersDesc")}</p>
         </div>
         <div className="centers-grid">
           {CENTERS.map(c => <CenterCard key={c.id} center={c} setPage={setPage} />)}
@@ -98,10 +82,10 @@ function HomePage({ setPage }) {
       {/* CTA */}
       <section className="section" style={{ textAlign: "center", position: "relative", overflow: "hidden" }}>
         <div className="orb" style={{ width: 400, height: 400, background: "var(--indigo)", top: -100, left: "30%", opacity: 0.06 }} />
-        <div className="section-tag">Get Started</div>
-        <h2 className="section-title">Ready to Build Your<br />Tech Career?</h2>
-        <p className="section-sub" style={{ marginBottom: "2rem" }}>Join thousands of Sudanese students already learning on Masar.</p>
-        <button className="btn btn-primary btn-lg" onClick={() => setPage("register")}>Create Free Account</button>
+        <div className="section-tag">{t("home.ctaTag")}</div>
+        <h2 className="section-title">{t("home.ctaTitle")}</h2>
+        <p className="section-sub" style={{ marginBottom: "2rem" }}>{t("home.ctaDesc")}</p>
+        <button className="btn btn-primary btn-lg" onClick={() => setPage("register")}>{t("home.ctaBtn")}</button>
       </section>
 
       <Footer setPage={setPage} />

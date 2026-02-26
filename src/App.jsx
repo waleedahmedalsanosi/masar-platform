@@ -30,6 +30,9 @@ import { useState, useEffect } from "react";
 // الأنماط العامة
 import styles from "./styles/globalStyles";
 
+// السياق العام (لغة + ثيم)
+import { SettingsProvider } from "./contexts/SettingsContext";
+
 // مكوّنات التخطيط
 import Navbar from "./components/Navbar";
 
@@ -157,7 +160,7 @@ export default function App() {
   };
 
   return (
-    <>
+    <SettingsProvider>
       {/* حقن أنماط CSS العامة */}
       <style dangerouslySetInnerHTML={{ __html: styles }} />
 
@@ -174,6 +177,6 @@ export default function App() {
 
       {/* محتوى الصفحة الحالية — كل صفحة تعرض Footer بنفسها */}
       <main>{renderPage()}</main>
-    </>
+    </SettingsProvider>
   );
 }

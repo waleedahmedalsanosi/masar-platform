@@ -9,6 +9,7 @@
  */
 
 import { useState } from "react";
+import { useSettings } from "../contexts/SettingsContext";
 
 /**
  * نافذة تعديل الكورس
@@ -18,6 +19,7 @@ import { useState } from "react";
  * @param {Function} props.onSave - callback يُستدعى مع بيانات المحدّثة
  */
 function EditCourseModal({ course, onClose, onSave }) {
+  const { t } = useSettings();
   const [form, setForm] = useState({
     title:    course.title    || "",
     price:    course.price    || "",
@@ -40,15 +42,15 @@ function EditCourseModal({ course, onClose, onSave }) {
       <div className="add-course-modal" style={{maxWidth:520}}>
         <div className="acm-header">
           <div>
-            <div className="acm-title">✏ Edit Course</div>
-            <div className="acm-sub">Changes will reflect immediately on the course page</div>
+            <div className="acm-title">✏ {t("ecm.title")}</div>
+            <div className="acm-sub">{t("ecm.subtitle")}</div>
           </div>
           <button className="em-close" onClick={onClose}>✕</button>
         </div>
         <div className="acm-body">
           {/* Icon */}
           <div className="form-group">
-            <label className="form-label">Course Icon</label>
+            <label className="form-label">{t("ecm.courseIcon")}</label>
             <div style={{display:"flex",gap:"0.4rem",flexWrap:"wrap"}}>
               {emojis.map(e=>(
                 <div key={e} onClick={()=>setForm(f=>({...f,image:e}))}
@@ -59,38 +61,38 @@ function EditCourseModal({ course, onClose, onSave }) {
             </div>
           </div>
           <div className="form-group">
-            <label className="form-label">Course Title</label>
+            <label className="form-label">{t("ecm.courseTitle")}</label>
             <input className="form-input" value={form.title} onChange={e=>setForm(f=>({...f,title:e.target.value}))} />
           </div>
           <div className="acm-row">
             <div className="form-group">
-              <label className="form-label">Price (USD)</label>
+              <label className="form-label">{t("ecm.price")}</label>
               <input className="form-input" type="number" value={form.price} onChange={e=>setForm(f=>({...f,price:e.target.value}))} />
               {form.price>0 && <div style={{fontSize:"0.72rem",color:"var(--text3)",marginTop:"0.25rem"}}>≈ SDG {(form.price*350).toLocaleString()}</div>}
             </div>
             <div className="form-group">
-              <label className="form-label">Level</label>
+              <label className="form-label">{t("ecm.level")}</label>
               <select className="acm-select" value={form.level} onChange={e=>setForm(f=>({...f,level:e.target.value}))}>
                 {["Beginner","Intermediate","Advanced"].map(l=><option key={l}>{l}</option>)}
               </select>
             </div>
           </div>
           <div className="form-group">
-            <label className="form-label">Duration</label>
+            <label className="form-label">{t("ecm.duration")}</label>
             <input className="form-input" placeholder="e.g. 8 weeks" value={form.duration} onChange={e=>setForm(f=>({...f,duration:e.target.value}))} />
           </div>
           <div className="form-group">
-            <label className="form-label">Status</label>
+            <label className="form-label">{t("ecm.status")}</label>
             <select className="acm-select" value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))}>
               {[["draft","📝 Draft"],["active","✅ Active"],["archived","📦 Archived"]].map(([v,l])=><option key={v} value={v}>{l}</option>)}
             </select>
           </div>
         </div>
         <div className="acm-footer">
-          <button className="btn btn-ghost" style={{padding:"0.6rem 1.1rem",borderRadius:9,fontSize:"0.875rem"}} onClick={onClose}>Cancel</button>
+          <button className="btn btn-ghost" style={{padding:"0.6rem 1.1rem",borderRadius:9,fontSize:"0.875rem"}} onClick={onClose}>{t("ecm.cancel")}</button>
           <button className="btn btn-primary" style={{padding:"0.6rem 1.35rem",borderRadius:9,fontSize:"0.875rem",display:"flex",alignItems:"center",gap:"0.4rem"}}
             onClick={handleSave} disabled={!form.title.trim()}>
-            {saved ? "✓ Saved!" : "Save Changes"}
+            {saved ? t("inst.saved") : t("ecm.save")}
           </button>
         </div>
       </div>

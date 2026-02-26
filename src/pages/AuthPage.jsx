@@ -1,26 +1,9 @@
-/**
- * @file AuthPage.jsx
- * @description صفحة تسجيل الدخول والتسجيل الجديد
- *
- * صفحة موحدة تدعم وضعين:
- * - login: تسجيل الدخول للمستخدمين الحاليين (التحقق من بيانات json-server)
- * - register: إنشاء حساب جديد مع اختيار نوع الحساب
- *   (Student / Instructor / Center Owner)
- *
- * البيانات محفوظة في db.json عبر json-server.
- */
-
 import { useState } from "react";
 import { api } from "../services/api";
+import { useSettings } from "../contexts/SettingsContext";
 
-/**
- * صفحة المصادقة (تسجيل الدخول / التسجيل)
- * @param {Object} props
- * @param {'login'|'register'} props.mode - وضع الصفحة
- * @param {Function} props.setPage - دالة التنقل بين الصفحات
- * @param {Function} props.onLogin - callback يُستدعى عند نجاح تسجيل الدخول مع بيانات المستخدم
- */
 function AuthPage({ mode, setPage, onLogin }) {
+  const { t } = useSettings();
   const [role, setRole]             = useState("student");
   const [isLogin, setIsLogin]       = useState(mode === "login");
   const [name, setName]             = useState("");
@@ -32,42 +15,30 @@ function AuthPage({ mode, setPage, onLogin }) {
   const [loading, setLoading]       = useState(false);
 
   const roles = [
-    { key: "student",    label: "Student",    icon: "🎓" },
-    { key: "instructor", label: "Instructor", icon: "👨‍🏫" },
-    { key: "marketer",   label: "Marketer",   icon: "📢" },
-    { key: "center",     label: "Center",     icon: "🏢" },
+    { key: "student",    label: t("auth.student"),    icon: "🎓" },
+    { key: "instructor", label: t("auth.instructor"), icon: "👨‍🏫" },
+    { key: "marketer",   label: t("auth.marketer"),   icon: "📢" },
+    { key: "center",     label: t("auth.center"),     icon: "🏢" },
   ];
 
   const handleSubmit = async () => {
-    if (!email || !password) { setError("Please fill in all required fields."); return; }
-    if (!isLogin && !name)   { setError("Please enter your name."); return; }
+    if (!email || !password) { setError(t("auth.fillFields")); return; }
+    if (!isLogin && !name)   { setError(t("auth.enterName")); return; }
     setError("");
     setLoading(true);
 
     try {
       if (isLogin) {
-        // ── تسجيل الدخول: البحث عن المستخدم بالإيميل ──
         const users = await api.findByEmail(email);
-        if (!users || users.length === 0) {
-          setError("No account found with this email.");
-          return;
-        }
+        if (!users || users.length === 0) { setError(t("auth.noAccount")); return; }
         const found = users[0];
-        if (found.password !== password) {
-          setError("Incorrect password. Please try again.");
-          return;
-        }
+        if (found.password !== password) { setError(t("auth.wrongPassword")); return; }
         const { password: _p, ...safeUser } = found;
         onLogin(safeUser);
         setPage(safeUser.role === "instructor" ? "inst-dashboard" : safeUser.role === "center" ? "center-dashboard" : safeUser.role === "marketer" ? "marketer-dashboard" : "dashboard");
-
       } else {
-        // ── تسجيل جديد: التحقق من عدم وجود الإيميل مسبقاً ──
         const existing = await api.findByEmail(email);
-        if (existing && existing.length > 0) {
-          setError("An account with this email already exists.");
-          return;
-        }
+        if (existing && existing.length > 0) { setError(t("auth.emailExists")); return; }
         const newUser = await api.createUser({
           name, email, password, role,
           specialization: spec || "Tech & Programming",
@@ -78,7 +49,7 @@ function AuthPage({ mode, setPage, onLogin }) {
         setPage(role === "instructor" ? "inst-dashboard" : role === "center" ? "center-dashboard" : role === "marketer" ? "marketer-dashboard" : "dashboard");
       }
     } catch (err) {
-      setError("Connection error. Make sure the server is running: npm run start");
+      setError(t("auth.serverError"));
     } finally {
       setLoading(false);
     }
@@ -88,12 +59,12 @@ function AuthPage({ mode, setPage, onLogin }) {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">Masar</div>
-        <div className="auth-title">{isLogin ? "Welcome back" : "Join Masar"}</div>
-        <div className="auth-sub">{isLogin ? "Sign in to continue your learning journey." : "Create your account and start growing today."}</div>
+        <div className="auth-title">{isLogin ? t("auth.welcomeBack") : t("auth.joinMasar")}</div>
+        <div className="auth-sub">{isLogin ? t("auth.loginSub") : t("auth.registerSub")}</div>
 
         {!isLogin && (
           <>
-            <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text2)", marginBottom: "0.5rem" }}>I am a...</div>
+            <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text2)", marginBottom: "0.5rem" }}>{t("auth.iam")}</div>
             <div className="role-selector">
               {roles.map(r => (
                 <button key={r.key} className={`role-btn ${role === r.key ? "selected" : ""}`} onClick={() => setRole(r.key)}>
@@ -106,32 +77,32 @@ function AuthPage({ mode, setPage, onLogin }) {
 
         {!isLogin && (
           <div className="form-group">
-            <label className="form-label">Full Name</label>
-            <input className="form-input" type="text" placeholder="Mohammed Abdallah" value={name} onChange={e => setName(e.target.value)} />
+            <label className="form-label">{t("auth.fullName")}</label>
+            <input className="form-input" type="text" placeholder={t("auth.fullNamePlaceholder")} value={name} onChange={e => setName(e.target.value)} />
           </div>
         )}
 
         <div className="form-group">
-          <label className="form-label">Email Address</label>
-          <input className="form-input" type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+          <label className="form-label">{t("auth.email")}</label>
+          <input className="form-input" type="email" placeholder={t("auth.emailPlaceholder")} value={email} onChange={e => setEmail(e.target.value)} />
         </div>
 
         {!isLogin && role === "student" && (
           <div className="form-group">
-            <label className="form-label">Specialization / Field of Interest</label>
-            <input className="form-input" type="text" placeholder="e.g. Data Science, Programming..." value={spec} onChange={e => setSpec(e.target.value)} />
+            <label className="form-label">{t("auth.specialization")}</label>
+            <input className="form-input" type="text" placeholder={t("auth.specializationPlaceholder")} value={spec} onChange={e => setSpec(e.target.value)} />
           </div>
         )}
         {!isLogin && role === "center" && (
           <div className="form-group">
-            <label className="form-label">Center Name</label>
-            <input className="form-input" type="text" placeholder="e.g. TechHub Khartoum" value={centerName} onChange={e => setCenterName(e.target.value)} />
+            <label className="form-label">{t("auth.centerName")}</label>
+            <input className="form-input" type="text" placeholder={t("auth.centerNamePlaceholder")} value={centerName} onChange={e => setCenterName(e.target.value)} />
           </div>
         )}
 
         <div className="form-group">
-          <label className="form-label">Password</label>
-          <input className="form-input" type="password" placeholder="••••••••" value={password}
+          <label className="form-label">{t("auth.password")}</label>
+          <input className="form-input" type="password" placeholder={t("auth.passwordPlaceholder")} value={password}
             onChange={e => setPassword(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleSubmit()} />
         </div>
@@ -146,22 +117,22 @@ function AuthPage({ mode, setPage, onLogin }) {
           style={{ width: "100%", padding: "0.85rem", fontSize: "1rem", borderRadius: 10, marginTop: "0.5rem", opacity: loading ? 0.7 : 1 }}
           onClick={handleSubmit}
           disabled={loading}>
-          {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
+          {loading ? t("auth.loading") : isLogin ? t("auth.signinBtn") : t("auth.createBtn")}
         </button>
 
         {isLogin && (
           <div style={{ marginTop: "1rem", padding: "0.75rem", background: "rgba(99,102,241,0.05)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 8, fontSize: "0.75rem", color: "var(--text3)", lineHeight: 1.6 }}>
-            <strong style={{ color: "var(--text2)" }}>Demo accounts:</strong><br />
-            Instructor: ahmed@masar.com / 123456<br />
-            Student: sara@masar.com / 123456<br />
-            Marketer: osama@masar.com / 123456
+            <strong style={{ color: "var(--text2)" }}>{t("auth.demoAccounts")}</strong><br />
+            {t("auth.demoInstructor")}<br />
+            {t("auth.demoStudent")}<br />
+            {t("auth.demoMarketer")}
           </div>
         )}
 
         <div className="auth-footer">
-          {isLogin ? "Don't have an account? " : "Already have an account? "}
+          {isLogin ? t("auth.noAccountYet") : t("auth.haveAccount")}{" "}
           <span className="auth-link" onClick={() => { setIsLogin(!isLogin); setError(""); }}>
-            {isLogin ? "Sign up" : "Sign in"}
+            {isLogin ? t("auth.signup") : t("auth.signinLink")}
           </span>
         </div>
       </div>

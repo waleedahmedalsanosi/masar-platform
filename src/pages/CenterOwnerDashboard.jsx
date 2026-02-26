@@ -18,6 +18,7 @@
 import { useState } from "react";
 import AddInstructorModal from "../modals/AddInstructorModal";
 import CourseReviewModal from "../modals/CourseReviewModal";
+import { useSettings } from "../contexts/SettingsContext";
 
 const CENTER_MOCK_INSTRUCTORS = [
   { id:1, name:"Ahmed Hassan",    avatar:"AH", title:"Data Scientist",      courses:2, students:320, rating:4.8, revenue:168000, feePerStudent:50, status:"active",  joinDate:"Jan 2024" },
@@ -57,6 +58,7 @@ const CENTER_FINANCES = {
 };
 
 function CenterOwnerDashboard({ user, setPage }) {
+  const { t } = useSettings();
   const [activeTab, setActiveTab]   = useState("overview");
   const [instructors, setInstructors] = useState(CENTER_MOCK_INSTRUCTORS);
   const [courses, setCourses]       = useState(CENTER_MOCK_COURSES);
@@ -88,12 +90,12 @@ function CenterOwnerDashboard({ user, setPage }) {
     setInstructors(prev=>prev.map(i=>i.id===id?{...i,status:action}:i));
 
   const tabs = [
-    { key:"overview",     label:"Overview",     icon:"📊" },
-    { key:"instructors",  label:"Instructors",  icon:"👨‍🏫", badge: instructors.filter(i=>i.status==="pending").length || null },
-    { key:"courses",      label:"Courses",      icon:"📚",  badge: pendingCourses || null },
-    { key:"requests",     label:"Requests",     icon:"📥",  badge: pendingRequests || null },
-    { key:"finances",     label:"Finances",     icon:"💰" },
-    { key:"profile",      label:"Center Profile",icon:"🏢" },
+    { key:"overview",     label: t("center.tab.overview"),     icon:"📊" },
+    { key:"instructors",  label: t("center.tab.instructors"),  icon:"👨‍🏫", badge: instructors.filter(i=>i.status==="pending").length || null },
+    { key:"courses",      label: t("center.tab.courses"),      icon:"📚",  badge: pendingCourses || null },
+    { key:"requests",     label: t("inst.tab.requests"),       icon:"📥",  badge: pendingRequests || null },
+    { key:"finances",     label: "Finances",                   icon:"💰" },
+    { key:"profile",      label: t("center.tab.profile"),      icon:"🏢" },
   ];
 
   const StatCard = ({icon,val,lbl,trend,color,onClick}) => (
@@ -189,7 +191,7 @@ function CenterOwnerDashboard({ user, setPage }) {
                   </div>
                 )}
                 <button className="btn btn-primary" style={{padding:"0.6rem 1.25rem",fontSize:"0.875rem",borderRadius:9}} onClick={()=>setShowAddInstructor(true)}>
-                  + Add Instructor
+                  {t("center.addInstructor")}
                 </button>
               </div>
             </div>
@@ -257,11 +259,11 @@ function CenterOwnerDashboard({ user, setPage }) {
           <div>
             <div className="inst-page-header">
               <div>
-                <div className="inst-page-title">Instructors</div>
+                <div className="inst-page-title">{t("center.instructorsTitle")}</div>
                 <div className="inst-page-sub">{activeInstructors} active · {instructors.filter(i=>i.status==="pending").length} pending approval</div>
               </div>
               <button className="btn btn-primary" style={{padding:"0.6rem 1.25rem",fontSize:"0.875rem",borderRadius:9}} onClick={()=>setShowAddInstructor(true)}>
-                + Add Instructor
+                {t("center.addInstructor")}
               </button>
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:"0.875rem"}}>
@@ -479,11 +481,11 @@ function CenterOwnerDashboard({ user, setPage }) {
           <div>
             <div className="inst-page-header">
               <div>
-                <div className="inst-page-title">Center Profile</div>
-                <div className="inst-page-sub">This is how students and instructors see your center on Masar</div>
+                <div className="inst-page-title">{t("center.tab.profile")}</div>
+                <div className="inst-page-sub">{t("center.profileSubtitle")}</div>
               </div>
               <button className="btn btn-ghost" style={{padding:"0.6rem 1.25rem",fontSize:"0.875rem",borderRadius:9}} onClick={()=>setPage("center-"+center.slug)}>
-                👁 View Public Page
+                {t("center.viewPublic")}
               </button>
             </div>
 
@@ -537,12 +539,12 @@ function CenterOwnerDashboard({ user, setPage }) {
                 </div>
 
                 <div style={{display:"flex",justifyContent:"flex-end",gap:"0.75rem",marginTop:"0.5rem"}}>
-                  <button className="btn btn-ghost" style={{padding:"0.6rem 1.25rem",borderRadius:9,fontSize:"0.875rem"}} onClick={()=>setCenterProfileSaved(false)}>Discard</button>
+                  <button className="btn btn-ghost" style={{padding:"0.6rem 1.25rem",borderRadius:9,fontSize:"0.875rem"}} onClick={()=>setCenterProfileSaved(false)}>{t("center.discard")}</button>
                   <button className="btn btn-primary" style={{padding:"0.6rem 1.25rem",borderRadius:9,fontSize:"0.875rem"}} onClick={()=>setCenterProfileSaved(true)}>
-                    {centerProfileSaved?"✓ Saved!":"Save Changes"}
+                    {centerProfileSaved ? t("center.saved") : t("center.saveChanges")}
                   </button>
                 </div>
-                {centerProfileSaved && <div style={{textAlign:"right",fontSize:"0.78rem",color:"#22c55e",marginTop:"0.4rem"}}>✓ Center profile updated successfully</div>}
+                {centerProfileSaved && <div style={{textAlign:"right",fontSize:"0.78rem",color:"#22c55e",marginTop:"0.4rem"}}>{t("center.profileUpdated")}</div>}
               </div>
             </div>
           </div>
