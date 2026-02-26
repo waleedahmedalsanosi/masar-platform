@@ -54,6 +54,14 @@ export const api = {
   /** الرد على سؤال */
   replyQA: (id, answer) => patch(`/qaItems/${id}`, { answer }),
 
+  // ── Course Views ─────────────────────────────────────────
+  /** جلب مشاهدات كورس معين */
+  getCourseViews: (courseId) => get(`/courseViews?courseId=${courseId}`),
+  /** جلب كل المشاهدات */
+  getAllCourseViews: () => get("/courseViews"),
+  /** تسجيل مشاهدة جديدة */
+  createView: (data) => post("/courseViews", data),
+
   // ── Marketers ────────────────────────────────────────────
   /** جلب كل المسوقين المسجلين */
   getMarketers: () => get("/users?role=marketer"),

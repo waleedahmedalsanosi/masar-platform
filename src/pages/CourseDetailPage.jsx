@@ -17,6 +17,7 @@ import { useState, useEffect } from "react";
 import { COURSES, COURSE_DETAILS, INSTRUCTORS, INSTRUCTOR_DETAILS, CENTERS } from "../data";
 import QASection from "../components/QASection";
 import EnrollmentModal from "../modals/EnrollmentModal";
+import { api } from "../services/api";
 
 /**
  * صفحة تفاصيل الكورس
@@ -32,6 +33,14 @@ function CourseDetailPage({ courseId, setPage }) {
   const [playing, setPlaying] = useState(false);
   const [showEnroll, setShowEnroll] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
+
+  // تسجيل مشاهدة جديدة عند فتح الصفحة
+  useEffect(() => {
+    if (courseId) {
+      api.createView({ courseId: String(courseId), viewedAt: new Date().toISOString() })
+        .catch(() => {});
+    }
+  }, [courseId]);
 
   // فتح فورم التسجيل تلقائياً عند المجيء عبر رابط الفورم المباشر
   useEffect(() => {

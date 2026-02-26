@@ -19,6 +19,7 @@ import { useState } from "react";
 import AddInstructorModal from "../modals/AddInstructorModal";
 import CourseReviewModal from "../modals/CourseReviewModal";
 import { useSettings } from "../contexts/SettingsContext";
+import { CENTERS } from "../data";
 
 const CENTER_MOCK_INSTRUCTORS = [
   { id:1, name:"Ahmed Hassan",    avatar:"AH", title:"Data Scientist",      courses:2, students:320, rating:4.8, revenue:168000, feePerStudent:50, status:"active",  joinDate:"Jan 2024" },
@@ -28,11 +29,11 @@ const CENTER_MOCK_INSTRUCTORS = [
 ];
 
 const CENTER_MOCK_COURSES = [
-  { id:1, image:"🐍", title:"Python for Data Science",       instructor:"Ahmed Hassan",  students:320, price:150, centerFee:50, status:"published", rating:4.8, publishDate:"Jan 10, 2024" },
-  { id:3, image:"🤖", title:"Machine Learning Fundamentals", instructor:"Khalid Ibrahim",students:180, price:300, centerFee:50, status:"published", rating:4.7, publishDate:"Feb 5, 2024"  },
-  { id:2, image:"🌐", title:"Full Stack Web Development",    instructor:"Sara Mohamed",  students:210, price:250, centerFee:50, status:"published", rating:4.9, publishDate:"Mar 1, 2024"  },
-  { id:9, image:"🔧", title:"Data Engineering Bootcamp",     instructor:"Ahmed Hassan",  students:0,   price:280, centerFee:50, status:"active",    rating:0,   publishDate:"This week"     },
-  { id:10,image:"🎨", title:"UI/UX Fundamentals",            instructor:"Amira Osman",   students:0,   price:120, centerFee:50, status:"draft",     rating:0,   publishDate:"—"             },
+  { id:1, image:"🐍", title:"Python for Data Science",       instructor:"Ahmed Hassan",  students:320, price:150, centerFee:50, status:"published", rating:4.8, publishDate:"Jan 10, 2024", views:245 },
+  { id:3, image:"🤖", title:"Machine Learning Fundamentals", instructor:"Khalid Ibrahim",students:180, price:300, centerFee:50, status:"published", rating:4.7, publishDate:"Feb 5, 2024",  views:167 },
+  { id:2, image:"🌐", title:"Full Stack Web Development",    instructor:"Sara Mohamed",  students:210, price:250, centerFee:50, status:"published", rating:4.9, publishDate:"Mar 1, 2024",  views:198 },
+  { id:9, image:"🔧", title:"Data Engineering Bootcamp",     instructor:"Ahmed Hassan",  students:0,   price:280, centerFee:50, status:"active",    rating:0,   publishDate:"This week",     views:43  },
+  { id:10,image:"🎨", title:"UI/UX Fundamentals",            instructor:"Amira Osman",   students:0,   price:120, centerFee:50, status:"draft",     rating:0,   publishDate:"—",             views:12  },
 ];
 
 const CENTER_MOCK_REQUESTS = [
@@ -41,6 +42,8 @@ const CENTER_MOCK_REQUESTS = [
   { id:3, name:"Nour Abdallah", avatar:"NA", course:"Full Stack Web Development",    instructor:"Sara Mohamed",  payment:"bank", amount:250, time:"1d ago",  status:"accepted" },
   { id:4, name:"Yassir Musa",   avatar:"YM", course:"Python for Data Science",       instructor:"Ahmed Hassan",  payment:"momo", amount:150, time:"2d ago",  status:"rejected" },
   { id:5, name:"Salma Elzain",  avatar:"SE", course:"Machine Learning Fundamentals", instructor:"Khalid Ibrahim",payment:"bank", amount:300, time:"3d ago",  status:"accepted" },
+  { id:6, name:"Fatima Omar",   avatar:"FO", course:"Python for Data Science",       instructor:"Ahmed Hassan",  payment:null,   amount:150, time:"30m ago", status:"reserved" },
+  { id:7, name:"Omar Bashir",   avatar:"OB", course:"Full Stack Web Development",    instructor:"Sara Mohamed",  payment:null,   amount:250, time:"1h ago",  status:"reserved" },
 ];
 
 const CENTER_FINANCES = {
@@ -89,10 +92,16 @@ function CenterOwnerDashboard({ user, setPage }) {
   const handleInstructorAction = (id, action) =>
     setInstructors(prev=>prev.map(i=>i.id===id?{...i,status:action}:i));
 
+  const totalCenterViews   = CENTER_MOCK_COURSES.reduce((s,c)=>s+(c.views||0),0);
+  const centerReserved     = requests.filter(r=>r.status==="reserved").length;
+  const centerAccepted     = requests.filter(r=>r.status==="accepted").length;
+  const centerConvRate     = totalCenterViews > 0 ? Math.round((centerAccepted / totalCenterViews) * 100) : 0;
+
   const tabs = [
     { key:"overview",     label: t("center.tab.overview"),     icon:"📊" },
     { key:"instructors",  label: t("center.tab.instructors"),  icon:"👨‍🏫", badge: instructors.filter(i=>i.status==="pending").length || null },
     { key:"courses",      label: t("center.tab.courses"),      icon:"📚",  badge: pendingCourses || null },
+    { key:"analytics",    label: t("analytics.tab"),           icon:"📈" },
     { key:"requests",     label: t("inst.tab.requests"),       icon:"📥",  badge: pendingRequests || null },
     { key:"finances",     label: "Finances",                   icon:"💰" },
     { key:"profile",      label: t("center.tab.profile"),      icon:"🏢" },
@@ -353,6 +362,142 @@ function CenterOwnerDashboard({ user, setPage }) {
           </div>
         )}
 
+        {/* ── ANALYTICS ── */}
+        {activeTab==="analytics" && (
+          <div>
+            <div className="inst-page-header">
+              <div>
+                <div className="inst-page-title">{t("analytics.centerTitle")}</div>
+                <div className="inst-page-sub">{t("analytics.centerSubtitle")}</div>
+              </div>
+            </div>
+
+            {/* Summary stats */}
+            <div className="ov-stats">
+              {[
+                { icon:"👁",  val: totalCenterViews,  lbl: t("analytics.totalCourseViews"), color:"#6366f1" },
+                { icon:"📝",  val: requests.length,   lbl: t("analytics.totalSubmissions"), color:"#06b6d4" },
+                { icon:"🔖",  val: centerReserved,    lbl: t("analytics.reserved"),         color:"#f59e0b" },
+                { icon:"✅",  val: centerAccepted,    lbl: t("analytics.accepted"),         color:"#22c55e" },
+              ].map(s=>(
+                <div key={s.lbl} className="ov-stat-card">
+                  <div className="ov-stat-glow" style={{background:s.color}}/>
+                  <div className="ov-stat-icon">{s.icon}</div>
+                  <div className="ov-stat-val" style={{background:`linear-gradient(135deg,${s.color},white)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>{s.val}</div>
+                  <div className="ov-stat-lbl">{s.lbl}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Enrollment funnel */}
+            <div style={{marginTop:"1.5rem",display:"grid",gridTemplateColumns:"1fr 1fr",gap:"1.25rem"}}>
+              {/* Funnel chart */}
+              <div className="ov-card">
+                <div className="ov-card-hd">🔄 {t("analytics.enrollmentFunnel")}</div>
+                <div className="ov-card-bd" style={{paddingTop:"0.5rem"}}>
+                  {[
+                    { label: t("analytics.totalViews"),       val: totalCenterViews, color:"#6366f1", pct: 100 },
+                    { label: t("analytics.totalSubmissions"), val: requests.length,  color:"#06b6d4", pct: totalCenterViews>0?Math.round(requests.length/totalCenterViews*100):0 },
+                    { label: t("analytics.reserved"),         val: centerReserved,   color:"#f59e0b", pct: totalCenterViews>0?Math.round(centerReserved/totalCenterViews*100):0 },
+                    { label: t("analytics.accepted"),         val: centerAccepted,   color:"#22c55e", pct: totalCenterViews>0?Math.round(centerAccepted/totalCenterViews*100):0 },
+                  ].map(f=>(
+                    <div key={f.label} style={{marginBottom:"0.875rem"}}>
+                      <div style={{display:"flex",justifyContent:"space-between",fontSize:"0.78rem",marginBottom:"0.3rem"}}>
+                        <span style={{color:"var(--text2)"}}>{f.label}</span>
+                        <span style={{fontFamily:"Syne,sans-serif",fontWeight:700,color:f.color}}>{f.val} <span style={{color:"var(--text3)",fontWeight:400}}>({f.pct}%)</span></span>
+                      </div>
+                      <div style={{height:7,background:"var(--border2)",borderRadius:100}}>
+                        <div style={{height:"100%",width:`${f.pct}%`,background:f.color,borderRadius:100,transition:"width 0.5s ease"}}/>
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{marginTop:"1rem",paddingTop:"0.875rem",borderTop:"1px solid var(--border2)",display:"flex",justifyContent:"space-between",fontSize:"0.78rem"}}>
+                    <span style={{color:"var(--text3)"}}>{t("analytics.convRate")}</span>
+                    <span style={{fontFamily:"Syne,sans-serif",fontWeight:700,color:centerConvRate>5?"#22c55e":"#f59e0b"}}>{centerConvRate}%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top courses by views */}
+              <div className="ov-card">
+                <div className="ov-card-hd">🏆 {t("analytics.topCourse")}</div>
+                <div className="ov-card-bd">
+                  {[...CENTER_MOCK_COURSES].sort((a,b)=>(b.views||0)-(a.views||0)).map((c,i)=>(
+                    <div key={c.id} className="ov-course-row">
+                      <div style={{width:22,height:22,borderRadius:6,background:"var(--gradient)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.65rem",fontWeight:700,color:"white",fontFamily:"Syne,sans-serif",flexShrink:0}}>#{i+1}</div>
+                      <span style={{fontSize:"1.1rem"}}>{c.image}</span>
+                      <div style={{flex:1}}>
+                        <div className="ov-course-name" style={{fontSize:"0.8rem"}}>{c.title}</div>
+                        <div className="ov-course-students">{c.instructor}</div>
+                      </div>
+                      <div style={{textAlign:"right"}}>
+                        <div style={{fontFamily:"Syne,sans-serif",fontWeight:700,color:"#6366f1",fontSize:"0.9rem"}}>{c.views||0}</div>
+                        <div style={{fontSize:"0.65rem",color:"var(--text3)"}}>{t("analytics.views")}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Per-course breakdown */}
+            <div style={{marginTop:"1.5rem"}}>
+              <div style={{fontFamily:"Syne,sans-serif",fontWeight:700,fontSize:"0.92rem",marginBottom:"1rem",color:"var(--text)"}}>
+                📊 {t("analytics.perCourseBreakdown")}
+              </div>
+              <div className="ov-card">
+                <div style={{overflowX:"auto"}}>
+                  <table style={{width:"100%",borderCollapse:"collapse",fontSize:"0.82rem"}}>
+                    <thead>
+                      <tr style={{borderBottom:"1px solid var(--border2)"}}>
+                        {[t("inst.coursesTitle"), t("analytics.views"), t("analytics.totalSubmissions"), t("analytics.reserved"), t("analytics.accepted"), t("analytics.rejected"), t("analytics.convRate")].map(h=>(
+                          <th key={h} style={{padding:"0.6rem 0.875rem",textAlign:"left",fontSize:"0.7rem",color:"var(--text3)",fontWeight:600,whiteSpace:"nowrap"}}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {CENTER_MOCK_COURSES.map(c=>{
+                        const cReqs     = requests.filter(r=>r.course===c.title);
+                        const cAccepted = cReqs.filter(r=>r.status==="accepted").length;
+                        const cRejected = cReqs.filter(r=>r.status==="rejected").length;
+                        const cReserved = cReqs.filter(r=>r.status==="reserved").length;
+                        const cPending  = cReqs.filter(r=>r.status==="pending").length;
+                        const cConv     = (c.views||0)>0?Math.round(cAccepted/(c.views||1)*100):0;
+                        return (
+                          <tr key={c.id} style={{borderBottom:"1px solid var(--border2)"}}>
+                            <td style={{padding:"0.7rem 0.875rem"}}>
+                              <div style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>
+                                <span>{c.image}</span>
+                                <div>
+                                  <div style={{fontWeight:600,fontSize:"0.82rem"}}>{c.title}</div>
+                                  <div style={{fontSize:"0.7rem",color:"var(--text3)"}}>{c.instructor}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td style={{padding:"0.7rem 0.875rem",fontFamily:"Syne,sans-serif",fontWeight:700,color:"#6366f1"}}>{c.views||0}</td>
+                            <td style={{padding:"0.7rem 0.875rem"}}>{cReqs.length}</td>
+                            <td style={{padding:"0.7rem 0.875rem",color:"#f59e0b",fontWeight:600}}>{cReserved}</td>
+                            <td style={{padding:"0.7rem 0.875rem",color:"#22c55e",fontWeight:600}}>{cAccepted}</td>
+                            <td style={{padding:"0.7rem 0.875rem",color:"#f87171"}}>{cRejected}</td>
+                            <td style={{padding:"0.7rem 0.875rem"}}>
+                              <div style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>
+                                <div style={{flex:1,height:5,background:"var(--border2)",borderRadius:100}}>
+                                  <div style={{height:"100%",width:`${Math.min(cConv,100)}%`,background:"linear-gradient(90deg,#6366f1,#22c55e)",borderRadius:100}}/>
+                                </div>
+                                <span style={{fontSize:"0.75rem",fontWeight:600,color:cConv>5?"#22c55e":"var(--text3)",minWidth:32}}>{cConv}%</span>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── REQUESTS ── */}
         {activeTab==="requests" && (
           <div>
@@ -371,7 +516,12 @@ function CenterOwnerDashboard({ user, setPage }) {
                     <div className="req-course-name">{r.course}</div>
                     <div className="req-details">
                       👨‍🏫 {r.instructor} &nbsp;·&nbsp;
-                      <span className="req-payment-badge">{r.payment==="bank"?"🏦 Bank":"📱 Mobile Money"} · SDG {(r.amount*350).toLocaleString()}</span>
+                      <span className="req-payment-badge">
+                        {r.status==="reserved"
+                          ? `🔖 Reserved · SDG ${(r.amount*350).toLocaleString()}`
+                          : `${r.payment==="bank"?"🏦 Bank":"📱 Mobile Money"} · SDG ${(r.amount*350).toLocaleString()}`
+                        }
+                      </span>
                     </div>
                   </div>
                   <div style={{textAlign:"right"}}>

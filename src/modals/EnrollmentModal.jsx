@@ -240,7 +240,30 @@ function EnrollmentModal({ course, onClose }) {
               </div>
 
               <button className="btn btn-primary" style={{width:"100%",padding:"0.9rem",borderRadius:10,fontSize:"0.95rem",marginBottom:"0.5rem"}}
-                onClick={() => { if (validate()) setStep(payLater ? "done" : "payment-choice"); }}>
+                onClick={async () => {
+                  if (!validate()) return;
+                  if (payLater) {
+                    // حفظ الحجز في قاعدة البيانات كطلب بحالة "reserved"
+                    try {
+                      const initials = (form.fullName || "??").split(" ").map(n=>n[0]).join("").slice(0,2).toUpperCase();
+                      await api.createRequest({
+                        courseId:     String(course.id),
+                        instructorId: String(course.instructorId || 1),
+                        name:    form.fullName || "—",
+                        avatar:  initials,
+                        course:  course.title,
+                        phone:   form.phone   || "—",
+                        email:   form.email   || "—",
+                        payment: null,
+                        amount:  course.price,
+                        time:    "just now",
+                        status:  "reserved",
+                        fields:  form,
+                      });
+                    } catch { /* نكمل حتى لو فشل الحفظ */ }
+                  }
+                  setStep(payLater ? "done" : "payment-choice");
+                }}>
                 {payLater ? `${t("enroll.reserveSeat")} →` : `${t("enroll.continuePayment")} →`}
               </button>
               <div style={{textAlign:"center",fontSize:"0.75rem",color:"var(--text3)"}}>🔒 {t("enroll.safeInfo")}</div>
