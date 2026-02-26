@@ -35,7 +35,7 @@ function AuthPage({ mode, setPage, onLogin }) {
         if (found.password !== password) { setError(t("auth.wrongPassword")); return; }
         const { password: _p, ...safeUser } = found;
         onLogin(safeUser);
-        setPage(safeUser.role === "instructor" ? "inst-dashboard" : safeUser.role === "center" ? "center-dashboard" : safeUser.role === "marketer" ? "marketer-dashboard" : "dashboard");
+        setPage(safeUser.role === "instructor" ? "inst-dashboard" : safeUser.role === "center" ? "center-dashboard" : safeUser.role === "marketer" ? "marketer-dashboard" : safeUser.role === "admin" ? "admin-dashboard" : "dashboard");
       } else {
         const existing = await api.findByEmail(email);
         if (existing && existing.length > 0) { setError(t("auth.emailExists")); return; }
@@ -46,7 +46,7 @@ function AuthPage({ mode, setPage, onLogin }) {
         });
         const { password: _p, ...safeUser } = newUser;
         onLogin(safeUser);
-        setPage(role === "instructor" ? "inst-dashboard" : role === "center" ? "center-dashboard" : role === "marketer" ? "marketer-dashboard" : "dashboard");
+        setPage(role === "instructor" ? "inst-dashboard" : role === "center" ? "center-dashboard" : role === "marketer" ? "marketer-dashboard" : role === "admin" ? "admin-dashboard" : "dashboard");
       }
     } catch (err) {
       setError(t("auth.serverError"));
@@ -126,7 +126,8 @@ function AuthPage({ mode, setPage, onLogin }) {
             {t("auth.demoInstructor")}<br />
             {t("auth.demoStudent")}<br />
             {t("auth.demoMarketer")}<br />
-            {t("auth.demoCenter")}
+            {t("auth.demoCenter")}<br />
+            {t("auth.demoAdmin")}
           </div>
         )}
 

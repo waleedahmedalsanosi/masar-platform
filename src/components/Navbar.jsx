@@ -11,9 +11,12 @@ function Navbar({ activePage, setPage, scrolled, user, onLogout }) {
   const dashPage = user?.role === "instructor" ? "inst-dashboard"
                  : user?.role === "center"     ? "center-dashboard"
                  : user?.role === "marketer"   ? "marketer-dashboard"
+                 : user?.role === "admin"      ? "admin-dashboard"
                  : "dashboard";
 
-  const isDashActive = ["dashboard","inst-dashboard","center-dashboard","marketer-dashboard"].includes(activePage);
+  const isDashActive = ["dashboard","inst-dashboard","center-dashboard","marketer-dashboard","admin-dashboard"].includes(activePage);
+
+  const dashLabel = user?.role === "admin" ? t("nav.adminPanel") : t("nav.myspace");
 
   return (
     <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
@@ -30,7 +33,7 @@ function Navbar({ activePage, setPage, scrolled, user, onLogout }) {
         {user && (
           <li>
             <a className={isDashActive ? "active" : ""} onClick={() => setPage(dashPage)}>
-              {t("nav.myspace")}
+              {dashLabel}
             </a>
           </li>
         )}
@@ -58,7 +61,7 @@ function Navbar({ activePage, setPage, scrolled, user, onLogout }) {
         {/* ── Auth Buttons ── */}
         {user ? (
           <>
-            <div className="nav-user" onClick={() => setPage(dashPage)}>
+            <div className="nav-user" onClick={() => setPage(dashPage)} title={dashLabel}>
               <div className="nav-avatar">{initials}</div>
               <span className="nav-username">{user.name.split(" ")[0]}</span>
             </div>

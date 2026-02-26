@@ -44,6 +44,15 @@
       "role": "marketer",
       "specialization": "Tech & Programming",
       "centerName": null
+    },
+    {
+      "id": "admin1",
+      "name": "Platform Admin",
+      "email": "admin@masar.com",
+      "password": "admin123",
+      "role": "admin",
+      "specialization": null,
+      "centerName": null
     }
   ],
   "instructorCourses": [

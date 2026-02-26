@@ -75,4 +75,16 @@ export const api = {
   deleteAssignment: (id) => del(`/marketerAssignments/${id}`),
   /** جلب طلبات التسجيل المرتبطة بمسوق معين */
   getMarketerRequests: (marketerId) => get(`/enrollmentRequests?marketerId=${marketerId}`),
+
+  // ── Admin — Full Data Access ─────────────────────────────────────────────
+  /** جلب كل المستخدمين */
+  getAllUsers:    ()        => get("/users"),
+  /** تحديث بيانات مستخدم */
+  updateUser:    (id, upd) => patch(`/users/${id}`, upd),
+  /** حذف مستخدم */
+  deleteUser:    (id)      => del(`/users/${id}`),
+  /** جلب كل الكورسات من كل المدربين */
+  getAllCourses:  ()        => get("/instructorCourses"),
+  /** جلب كل طلبات التسجيل */
+  getAllRequests: ()        => get("/enrollmentRequests"),
 };

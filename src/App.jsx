@@ -51,6 +51,7 @@ import DashboardPage from "./pages/DashboardPage";
 import InstructorDashboard from "./pages/InstructorDashboard";
 import CenterOwnerDashboard from "./pages/CenterOwnerDashboard";
 import MarketerDashboard from "./pages/MarketerDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 
 // صفحات التفاصيل
 import CourseDetailPage from "./pages/CourseDetailPage";
@@ -134,6 +135,7 @@ export default function App() {
     if (page === "inst-dashboard") return <InstructorDashboard user={user} setPage={setPage} />;
     if (page === "center-dashboard") return <CenterOwnerDashboard user={user} setPage={setPage} />;
     if (page === "marketer-dashboard") return <MarketerDashboard user={user} setPage={setPage} />;
+    if (page === "admin-dashboard") return <AdminDashboard user={user} setPage={setPage} />;
     if (page === "login") return <AuthPage mode="login" setPage={setPage} onLogin={handleLogin} />;
     if (page === "register") return <AuthPage mode="register" setPage={setPage} onLogin={handleLogin} />;
     if (page.startsWith("course-")) return <CourseDetailPage courseId={parseInt(page.replace("course-", ""))} setPage={setPage} />;
@@ -156,6 +158,7 @@ export default function App() {
     if (page.startsWith("center-") || page === "centers") return "centers";
     if (page === "inst-dashboard") return "inst-dashboard";
     if (page === "center-dashboard") return "center-dashboard";
+    if (page === "admin-dashboard") return "admin-dashboard";
     return page;
   };
 
