@@ -125,7 +125,8 @@ function AuthPage({ mode, setPage, onLogin }) {
             <strong style={{ color: "var(--text2)" }}>{t("auth.demoAccounts")}</strong><br />
             {t("auth.demoInstructor")}<br />
             {t("auth.demoStudent")}<br />
-            {t("auth.demoMarketer")}
+            {t("auth.demoMarketer")}<br />
+            {t("auth.demoCenter")}
           </div>
         )}
 
