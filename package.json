@@ -10,16 +10,14 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.0",
     "concurrently": "^9.2.1",
-    "json-server": "^1.0.0-beta.9",
+    "json-server": "^0.17.4",
     "vite": "^7.3.1"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"vite\" \"npm run server\"",
     "server": "json-server --watch db.json --port 3001",
-    "start": "concurrently \"npm run dev\" \"npm run server\"",
+    "start": "node server.js",
     "build": "vite build",
-    "preview": "vite preview",
-    "build:prod": "vite build",
-    "start:prod": "node server.js"
+    "preview": "vite preview"
   }
 }
