@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    padding: 16px;
+    background: #1e1e2e;
+    color: #cdd6f4;
+    min-height: 200px;
+  }
+  h2 { font-size: 15px; margin-bottom: 12px; color: #89b4fa; }
+  .status-box {
+    background: #313244;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 13px;
+    margin-bottom: 12px;
+    min-height: 48px;
+    line-height: 1.6;
+  }
+  .status-box.error { border-left: 3px solid #f38ba8; color: #f38ba8; }
+  .status-box.success { border-left: 3px solid #a6e3a1; color: #a6e3a1; }
+  .status-box.loading { border-left: 3px solid #89b4fa; }
+  button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #89b4fa;
+    color: #1e1e2e;
+    transition: opacity 0.2s;
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .progress {
+    margin-top: 10px;
+    height: 6px;
+    background: #45475a;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: #89b4fa;
+    border-radius: 3px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+</style>
+</head>
+<body>
+<h2>🎨 Masar Platform Importer</h2>
+
+<div class="status-box loading" id="status">
+  جاري الاتصال بالسيرفر المحلي...
+</div>
+
+<div class="progress" id="progressWrap" style="display:none">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<br/>
+<button id="importBtn" disabled>استيراد الشاشات لـ Figma</button>
+
+<script>
+const statusEl   = document.getElementById('status');
+const importBtn  = document.getElementById('importBtn');
+const progressWrap = document.getElementById('progressWrap');
+const progressBar  = document.getElementById('progressBar');
+
+let screenshots = [];
+
+function setStatus(msg, type = '') {
+  statusEl.textContent = msg;
+  statusEl.className = 'status-box ' + type;
+}
+
+// ── تحقق من السيرفر ──────────────────────────────────────────────────────────
+async function checkServer() {
+  try {
+    const res = await fetch('http://localhost:3333/status');
+    const data = await res.json();
+    if (data.screenshots === 0) {
+      setStatus('السيرفر يعمل لكن لا توجد صور.\nشغّل: node scripts/take-screenshots.js', 'error');
+    } else {
+      setStatus(`✅ السيرفر متصل — ${data.screenshots} شاشة جاهزة للاستيراد`, 'success');
+      importBtn.disabled = false;
+    }
+  } catch {
+    setStatus('❌ السيرفر غير متصل!\nشغّل: node scripts/figma-server.js', 'error');
+    setTimeout(checkServer, 3000); // إعادة المحاولة كل 3 ثواني
+  }
+}
+
+// ── استيراد الشاشات ──────────────────────────────────────────────────────────
+importBtn.addEventListener('click', async () => {
+  importBtn.disabled = true;
+  setStatus('⏳ جاري تحميل الصور...', 'loading');
+  progressWrap.style.display = 'block';
+
+  try {
+    const res = await fetch('http://localhost:3333/screenshots');
+    screenshots = await res.json();
+
+    setStatus(`📤 جاري إنشاء ${screenshots.length} frame في Figma...`, 'loading');
+
+    // أرسل للـ plugin.js
+    parent.postMessage({
+      pluginMessage: { type: 'import-screens', screenshots }
+    }, '*');
+  } catch (err) {
+    setStatus('❌ خطأ في تحميل الصور: ' + err.message, 'error');
+    importBtn.disabled = false;
+  }
+});
+
+// ── استقبال رسائل من plugin.js ───────────────────────────────────────────────
+window.onmessage = (event) => {
+  const msg = event.data.pluginMessage;
+  if (!msg) return;
+
+  if (msg.type === 'progress') {
+    const pct = Math.round((msg.current / msg.total) * 100);
+    progressBar.style.width = pct + '%';
+    setStatus(`⏳ ${msg.current} / ${msg.total} — ${msg.name}`, 'loading');
+  }
+
+  if (msg.type === 'done') {
+    progressBar.style.width = '100%';
+    setStatus(`✅ تم! تم إنشاء ${msg.total} frame في Figma 🎉`, 'success');
+    importBtn.disabled = false;
+    importBtn.textContent = 'استيراد مجدداً';
+  }
+
+  if (msg.type === 'error') {
+    setStatus('❌ خطأ: ' + msg.message, 'error');
+    importBtn.disabled = false;
+  }
+};
+
+// ── بدء ──────────────────────────────────────────────────────────────────────
+checkServer();
+</script>
+</body>
+</html>

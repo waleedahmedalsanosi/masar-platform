@@ -107,25 +107,32 @@ alter table marketer_assignments enable row level security;
 alter table course_views enable row level security;
 
 -- Authenticated users can access all data (expand later with granular policies)
+drop policy if exists "authenticated_all" on profiles;
 create policy "authenticated_all" on profiles
   for all using (auth.role() = 'authenticated');
 
+drop policy if exists "authenticated_all" on instructor_courses;
 create policy "authenticated_all" on instructor_courses
   for all using (auth.role() = 'authenticated');
 
+drop policy if exists "authenticated_all" on enrollment_requests;
 create policy "authenticated_all" on enrollment_requests
   for all using (auth.role() = 'authenticated');
 
+drop policy if exists "authenticated_all" on qa_items;
 create policy "authenticated_all" on qa_items
   for all using (auth.role() = 'authenticated');
 
+drop policy if exists "authenticated_all" on marketer_assignments;
 create policy "authenticated_all" on marketer_assignments
   for all using (auth.role() = 'authenticated');
 
+drop policy if exists "authenticated_all" on course_views;
 create policy "authenticated_all" on course_views
   for all using (auth.role() = 'authenticated');
 
 -- Anonymous users can log course views (from public course pages)
+drop policy if exists "anon_insert_views" on course_views;
 create policy "anon_insert_views" on course_views
   for insert with check (true);
 
