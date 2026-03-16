@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { COURSES } from "../data";
-import { useSettings } from "../contexts/SettingsContext";
-import { useAuth } from "../contexts/AuthContext";
+import { COURSES } from "../../data";
+import { useSettings } from "../../contexts/SettingsContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 const studentData = {
   name: "Mohammed Abdallah", role: "Student", specialization: "Data Science & ML",

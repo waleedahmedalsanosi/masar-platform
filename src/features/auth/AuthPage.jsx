@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../services/supabase";
-import { useSettings } from "../contexts/SettingsContext";
-import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "../../services/supabase";
+import { useSettings } from "../../contexts/SettingsContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 /** snake_case → camelCase */
 const toCamel = (obj) => {

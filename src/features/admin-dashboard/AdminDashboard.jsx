@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { api } from "../services/api";
-import { useSettings } from "../contexts/SettingsContext";
-import { useAuth } from "../contexts/AuthContext";
+import { api } from "../../services/api";
+import { useSettings } from "../../contexts/SettingsContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 const ROLE_COLORS = {
   student:    { bg: "rgba(16,185,129,0.12)", text: "#10b981" },

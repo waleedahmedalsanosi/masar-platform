@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import StarRating from "./StarRating";
+import StarRating from "../../shared/components/StarRating";
 
 export default function CourseCard({ course }) {
   const navigate = useNavigate();

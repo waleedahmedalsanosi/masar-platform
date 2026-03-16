@@ -17,11 +17,11 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AddInstructorModal from "../modals/AddInstructorModal";
-import CourseReviewModal from "../modals/CourseReviewModal";
-import { useSettings } from "../contexts/SettingsContext";
-import { useAuth } from "../contexts/AuthContext";
-import { CENTERS } from "../data";
+import AddInstructorModal from "../../modals/AddInstructorModal";
+import CourseReviewModal from "../../modals/CourseReviewModal";
+import { useSettings } from "../../contexts/SettingsContext";
+import { useAuth } from "../../contexts/AuthContext";
+import { CENTERS } from "../../data";
 
 const CENTER_MOCK_INSTRUCTORS = [
   { id:1, name:"Ahmed Hassan",    avatar:"AH", title:"Data Scientist",      courses:2, students:320, rating:4.8, revenue:168000, feePerStudent:50, status:"active",  joinDate:"Jan 2024" },

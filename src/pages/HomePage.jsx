@@ -1,15 +1,17 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import CourseCard from "../components/CourseCard";
 import CenterCard from "../components/CenterCard";
 import Footer from "../components/Footer";
 import { COURSES, CENTERS, STATS, FEATURES } from "../data";
 import { useSettings } from "../contexts/SettingsContext";
 
-function HomePage({ setPage }) {
+export default function HomePage() {
+  const navigate = useNavigate();
   const { t } = useSettings();
+
   return (
     <>
-      {/* HERO */}
       <section className="hero">
         <div className="hero-bg" />
         <div className="hero-grid" />
@@ -20,8 +22,8 @@ function HomePage({ setPage }) {
           <h1>{t("home.title").split(". ").slice(0,2).join(". ")}.<br /><span>{t("home.title").split(". ").slice(2).join(". ")}</span></h1>
           <p>{t("home.subtitle")}</p>
           <div className="hero-actions">
-            <button className="btn btn-primary btn-lg" onClick={() => setPage("courses")}>{t("home.explore")}</button>
-            <button className="btn btn-outline btn-lg" onClick={() => setPage("register")}>{t("home.joinInstructor")}</button>
+            <button className="btn btn-primary btn-lg" onClick={() => navigate("/courses")}>{t("home.explore")}</button>
+            <button className="btn btn-outline btn-lg" onClick={() => navigate("/register")}>{t("home.joinInstructor")}</button>
           </div>
           <div className="hero-stats">
             {STATS.map(s => (
@@ -34,7 +36,6 @@ function HomePage({ setPage }) {
         </div>
       </section>
 
-      {/* FEATURES */}
       <section className="section" style={{ background: "var(--bg2)" }}>
         <div className="section-header">
           <div className="section-tag">{t("home.whyTag")}</div>
@@ -52,7 +53,6 @@ function HomePage({ setPage }) {
         </div>
       </section>
 
-      {/* COURSES PREVIEW */}
       <section className="section">
         <div className="section-header">
           <div className="section-tag">{t("home.featuredTag")}</div>
@@ -60,14 +60,13 @@ function HomePage({ setPage }) {
           <p className="section-sub">{t("home.featuredDesc")}</p>
         </div>
         <div className="courses-grid">
-          {COURSES.slice(0, 4).map(c => <CourseCard key={c.id} course={c} setPage={setPage} />)}
+          {COURSES.slice(0, 4).map(c => <CourseCard key={c.id} course={c} />)}
         </div>
         <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
-          <button className="btn btn-outline btn-lg" onClick={() => setPage("courses")}>{t("home.viewAll")}</button>
+          <button className="btn btn-outline btn-lg" onClick={() => navigate("/courses")}>{t("home.viewAll")}</button>
         </div>
       </section>
 
-      {/* CENTERS PREVIEW */}
       <section className="section" style={{ background: "var(--bg2)" }}>
         <div className="section-header">
           <div className="section-tag">{t("home.centersTag")}</div>
@@ -75,22 +74,19 @@ function HomePage({ setPage }) {
           <p className="section-sub">{t("home.centersDesc")}</p>
         </div>
         <div className="centers-grid">
-          {CENTERS.map(c => <CenterCard key={c.id} center={c} setPage={setPage} />)}
+          {CENTERS.map(c => <CenterCard key={c.id} center={c} />)}
         </div>
       </section>
 
-      {/* CTA */}
       <section className="section" style={{ textAlign: "center", position: "relative", overflow: "hidden" }}>
         <div className="orb" style={{ width: 400, height: 400, background: "var(--indigo)", top: -100, left: "30%", opacity: 0.06 }} />
         <div className="section-tag">{t("home.ctaTag")}</div>
         <h2 className="section-title">{t("home.ctaTitle")}</h2>
         <p className="section-sub" style={{ marginBottom: "2rem" }}>{t("home.ctaDesc")}</p>
-        <button className="btn btn-primary btn-lg" onClick={() => setPage("register")}>{t("home.ctaBtn")}</button>
+        <button className="btn btn-primary btn-lg" onClick={() => navigate("/register")}>{t("home.ctaBtn")}</button>
       </section>
 
-      <Footer setPage={setPage} />
+      <Footer />
     </>
   );
 }
-
-export default HomePage;

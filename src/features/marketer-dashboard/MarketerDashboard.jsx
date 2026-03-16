@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { api } from "../services/api";
-import { useSettings } from "../contexts/SettingsContext";
-import { useAuth } from "../contexts/AuthContext";
+import { api } from "../../services/api";
+import { useSettings } from "../../contexts/SettingsContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 function MarketerDashboard() {
   const { user } = useAuth();

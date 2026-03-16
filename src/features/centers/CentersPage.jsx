@@ -1,7 +1,7 @@
 import React from "react";
-import CenterCard from "../components/CenterCard";
-import Footer from "../components/Footer";
-import { CENTERS } from "../data";
+import CenterCard from "./CenterCard";
+import Footer from "../../shared/components/Footer";
+import { CENTERS } from "../../data";
 
 export default function CentersPage() {
   return (

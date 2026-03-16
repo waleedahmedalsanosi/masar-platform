@@ -1,8 +1,8 @@
 import { useState } from "react";
-import CourseCard from "../components/CourseCard";
-import Footer from "../components/Footer";
-import { COURSES } from "../data";
-import { useSettings } from "../contexts/SettingsContext";
+import CourseCard from "./CourseCard";
+import Footer from "../../shared/components/Footer";
+import { COURSES } from "../../data";
+import { useSettings } from "../../contexts/SettingsContext";
 
 export default function CoursesPage() {
   const { t } = useSettings();

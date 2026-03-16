@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import CourseCard from "../components/CourseCard";
-import { INSTRUCTORS, INSTRUCTOR_DETAILS, COURSES, CENTERS } from "../data";
+import CourseCard from "../courses/CourseCard";
+import { INSTRUCTORS, INSTRUCTOR_DETAILS, COURSES, CENTERS } from "../../data";
 
 export default function InstructorProfilePage() {
   const { id } = useParams();

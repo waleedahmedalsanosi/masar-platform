@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import AddCourseModal from "../modals/AddCourseModal";
 import EditCourseModal from "../modals/EditCourseModal";
 import CourseReviewModal from "../modals/CourseReviewModal";
 import AssignMarketerModal from "../modals/AssignMarketerModal";
 import { useSettings } from "../contexts/SettingsContext";
+import { useAuth } from "../contexts/AuthContext";
 
-function InstructorDashboard({ user, setPage }) {
+function InstructorDashboard() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { t } = useSettings();
   const instructorId = user?.id || 1;
 
@@ -267,7 +271,7 @@ function InstructorDashboard({ user, setPage }) {
                   </div>
                   <div className="mgmt-actions">
                     <button className="mgmt-btn mgmt-btn-edit" onClick={() => setEditCourse(c)}>{t("inst.editBtn")}</button>
-                    {c.id <= 8 && <button className="mgmt-btn mgmt-btn-view" onClick={() => setPage("course-"+c.id)}>{t("inst.viewBtn")}</button>}
+                    {c.id <= 8 && <button className="mgmt-btn mgmt-btn-view" onClick={() => navigate(`/courses/${c.id}`)}>{t("inst.viewBtn")}</button>}
                     {c.status === "draft" && (
                       <button className="mgmt-btn" style={{ background: "rgba(34,197,94,0.1)", borderColor: "rgba(34,197,94,0.3)", color: "#22c55e" }}
                         onClick={() => handlePublish(c.id)}>
@@ -567,7 +571,7 @@ function InstructorDashboard({ user, setPage }) {
                 <div className="inst-page-title">{t("inst.profileTitle")}</div>
                 <div className="inst-page-sub">{t("inst.profileSubtitle")}</div>
               </div>
-              <button className="btn btn-ghost" style={{ padding:"0.6rem 1.25rem", fontSize:"0.875rem", borderRadius:9 }} onClick={() => setPage("instructor-1")}>
+              <button className="btn btn-ghost" style={{ padding:"0.6rem 1.25rem", fontSize:"0.875rem", borderRadius:9 }} onClick={() => navigate("/instructors/1")}>
                 {t("inst.viewPublic")}
               </button>
             </div>

@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import CourseCard from "../components/CourseCard";
-import { CENTERS, COURSES, INSTRUCTORS } from "../data";
+import CourseCard from "../courses/CourseCard";
+import { CENTERS, COURSES, INSTRUCTORS } from "../../data";
 
 export default function CenterProfilePage() {
   const { slug } = useParams();

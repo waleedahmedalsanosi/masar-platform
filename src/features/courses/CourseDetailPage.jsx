@@ -15,10 +15,10 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { COURSES, COURSE_DETAILS, INSTRUCTORS, INSTRUCTOR_DETAILS, CENTERS } from "../data";
-import QASection from "../components/QASection";
-import EnrollmentModal from "../modals/EnrollmentModal";
-import { api } from "../services/api";
+import { COURSES, COURSE_DETAILS, INSTRUCTORS, INSTRUCTOR_DETAILS, CENTERS } from "../../data";
+import QASection from "../../shared/components/QASection";
+import EnrollmentModal from "../../modals/EnrollmentModal";
+import { api } from "../../services/api";
 
 function CourseDetailPage() {
   const { id } = useParams();
