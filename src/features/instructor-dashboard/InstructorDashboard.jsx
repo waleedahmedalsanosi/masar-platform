@@ -1,10 +1,22 @@
-import { useState, useEffect } from "react";
-import { api } from "../../services/api";
+import { useState } from "react";
 import AddCourseModal from "../../modals/AddCourseModal";
 import EditCourseModal from "../../modals/EditCourseModal";
 import AssignMarketerModal from "../../modals/AssignMarketerModal";
 import { useSettings } from "../../contexts/SettingsContext";
 import { useAuth } from "../../contexts/AuthContext";
+import {
+  useInstructorCourses,
+  useInstructorRequests,
+  useInstructorQA,
+  useMarketerAssignments,
+  useAllCourseViews,
+  useCreateCourse,
+  useUpdateCourse,
+  useUpdateRequest,
+  useReplyQA,
+  useCreateAssignment,
+  useDeleteAssignment,
+} from "./hooks/useInstructorData";
 
 import Overview       from "./tabs/Overview";
 import CoursesList    from "./tabs/CoursesList";
@@ -20,48 +32,38 @@ export default function InstructorDashboard() {
   const instructorId = user?.id || 1;
 
   const [activeTab, setActiveTab]     = useState("overview");
-  const [courses, setCourses]         = useState([]);
-  const [requests, setRequests]       = useState([]);
-  const [qaItems, setQaItems]         = useState([]);
-  const [assignments, setAssignments] = useState([]);
-  const [views, setViews]             = useState([]);
-  const [loading, setLoading]         = useState(true);
   const [showAddCourse, setShowAddCourse] = useState(false);
   const [editCourse, setEditCourse]   = useState(null);
   const [showAssignMarketer, setShowAssignMarketer] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      try {
-        const [c, r, q, a, v] = await Promise.all([
-          api.getCourses(instructorId),
-          api.getRequests(instructorId),
-          api.getQA(instructorId),
-          api.getMarketerAssignments(instructorId),
-          api.getAllCourseViews(),
-        ]);
-        setCourses(c); setRequests(r); setQaItems(q); setAssignments(a); setViews(v);
-      } catch { } finally { setLoading(false); }
-    };
-    load();
-  }, [instructorId]);
+  // ── Data queries ──────────────────────────────────────────────
+  const { data: courses     = [], isLoading: lCourses  } = useInstructorCourses(instructorId);
+  const { data: requests    = [], isLoading: lRequests } = useInstructorRequests(instructorId);
+  const { data: qaItems     = [], isLoading: lQA       } = useInstructorQA(instructorId);
+  const { data: assignments = [], isLoading: lAssign   } = useMarketerAssignments(instructorId);
+  const { data: views       = []                       } = useAllCourseViews();
+
+  const loading = lCourses || lRequests || lQA || lAssign;
+
+  // ── Mutations ─────────────────────────────────────────────────
+  const createCourse      = useCreateCourse(instructorId);
+  const updateCourse      = useUpdateCourse(instructorId);
+  const updateRequest     = useUpdateRequest(instructorId);
+  const replyQA           = useReplyQA(instructorId);
+  const createAssignment  = useCreateAssignment(instructorId);
+  const deleteAssignment  = useDeleteAssignment(instructorId);
 
   const pendingCount    = requests.filter(r => r.status === "pending").length;
   const unansweredCount = qaItems.filter(q => !q.answer).length;
 
-  const handleRequestAction = async (id, action) => {
-    await api.updateRequest(id, { status: action });
-    setRequests(prev => prev.map(r => r.id === id ? { ...r, status: action } : r));
-  };
+  const handleRequestAction = (id, action) =>
+    updateRequest.mutate({ id, updates: { status: action } });
 
-  const handleReply = async (id, text) => {
-    await api.replyQA(id, text);
-    setQaItems(prev => prev.map(q => q.id === id ? { ...q, answer: text } : q));
-  };
+  const handleReply = (id, text) =>
+    replyQA.mutate({ id, answer: text });
 
-  const handleAddCourse = async (formData) => {
-    const newCourse = await api.createCourse({
+  const handleAddCourse = (formData) => {
+    createCourse.mutate({
       instructorId, title: formData.title, image: formData.image, category: formData.category,
       level: formData.level, mode: formData.mode, price: Number(formData.price), status: "draft",
       students: 0, rating: 0, revenue: 0, startDate: formData.startDate || "TBD",
@@ -69,32 +71,26 @@ export default function InstructorDashboard() {
       enrollmentFields: formData.enrollmentFields, meetLink: formData.meetLink || "",
       groupLink: formData.groupLink || "", location: formData.location || "",
       scheduleDays: formData.scheduleDays, weeks: formData.weeks,
+    }, {
+      onSuccess: () => { setShowAddCourse(false); setActiveTab("courses"); },
     });
-    setCourses(prev => [...prev, newCourse]);
-    setShowAddCourse(false);
-    setActiveTab("courses");
   };
 
-  const handleEditCourse = async (updated) => {
-    await api.updateCourse(updated.id, updated);
-    setCourses(prev => prev.map(c => c.id === updated.id ? { ...c, ...updated } : c));
-    setEditCourse(null);
-  };
+  const handleEditCourse = (updated) =>
+    updateCourse.mutate({ id: updated.id, updates: updated }, {
+      onSuccess: () => setEditCourse(null),
+    });
 
-  const handlePublish = async (courseId) => {
-    await api.updateCourse(courseId, { status: "active" });
-    setCourses(prev => prev.map(c => c.id === courseId ? { ...c, status: "active" } : c));
-  };
+  const handlePublish = (courseId) =>
+    updateCourse.mutate({ id: courseId, updates: { status: "active" } });
 
-  const handleAssignMarketer = (newAssignment) => {
-    setAssignments(prev => [...prev, newAssignment]);
-    setShowAssignMarketer(false);
-  };
+  const handleAssignMarketer = (data) =>
+    createAssignment.mutate(data, {
+      onSuccess: () => setShowAssignMarketer(false),
+    });
 
-  const handleRemoveAssignment = async (id) => {
-    await api.deleteAssignment(id);
-    setAssignments(prev => prev.filter(a => a.id !== id));
-  };
+  const handleRemoveAssignment = (id) =>
+    deleteAssignment.mutate(id);
 
   const tabs = [
     { key: "overview",   label: t("inst.tab.overview"),   icon: "📊" },

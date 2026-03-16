@@ -1,17 +1,25 @@
-import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import CourseCard from "../courses/CourseCard";
-import { CENTERS, COURSES, INSTRUCTORS } from "../../data";
+import {
+  usePublicCenters,
+  usePublicCourses,
+  usePublicInstructors,
+} from "../courses/hooks/usePublicData";
 
 export default function CenterProfilePage() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const center = CENTERS.find(c => c.slug === slug);
+
+  const { data: centers     = [] } = usePublicCenters();
+  const { data: allCourses  = [] } = usePublicCourses();
+  const { data: instructors = [] } = usePublicInstructors();
+
+  const center = centers.find(c => c.slug === slug);
 
   if (!center) return null;
 
-  const centerCourses = COURSES.filter(c => c.center === center.name);
-  const centerInstructors = INSTRUCTORS.filter(i => i.center === center.name);
+  const centerCourses = allCourses.filter(c => c.center === center.name);
+  const centerInstructors = instructors.filter(i => i.center === center.name);
 
   return (
     <div className="center-page">

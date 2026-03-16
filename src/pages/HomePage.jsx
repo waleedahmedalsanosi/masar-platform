@@ -1,14 +1,16 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
-import CourseCard from "../components/CourseCard";
-import CenterCard from "../components/CenterCard";
-import Footer from "../components/Footer";
-import { COURSES, CENTERS, STATS, FEATURES } from "../data";
+import CourseCard from "../features/courses/CourseCard";
+import CenterCard from "../features/centers/CenterCard";
+import Footer from "../shared/components/Footer";
+import { STATS, FEATURES } from "../data";
 import { useSettings } from "../contexts/SettingsContext";
+import { usePublicCourses, usePublicCenters } from "../features/courses/hooks/usePublicData";
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { t } = useSettings();
+  const { data: courses = [] } = usePublicCourses();
+  const { data: centers = [] } = usePublicCenters();
 
   return (
     <>
@@ -60,7 +62,7 @@ export default function HomePage() {
           <p className="section-sub">{t("home.featuredDesc")}</p>
         </div>
         <div className="courses-grid">
-          {COURSES.slice(0, 4).map(c => <CourseCard key={c.id} course={c} />)}
+          {courses.slice(0, 4).map(c => <CourseCard key={c.id} course={c} />)}
         </div>
         <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
           <button className="btn btn-outline btn-lg" onClick={() => navigate("/courses")}>{t("home.viewAll")}</button>
@@ -74,7 +76,7 @@ export default function HomePage() {
           <p className="section-sub">{t("home.centersDesc")}</p>
         </div>
         <div className="centers-grid">
-          {CENTERS.map(c => <CenterCard key={c.id} center={c} />)}
+          {centers.map(c => <CenterCard key={c.id} center={c} />)}
         </div>
       </section>
 

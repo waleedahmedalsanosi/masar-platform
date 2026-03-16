@@ -1,10 +1,10 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../shared/components/Footer";
-import { INSTRUCTORS } from "../../data";
+import { usePublicInstructors } from "../courses/hooks/usePublicData";
 
 export default function InstructorsPage() {
   const navigate = useNavigate();
+  const { data: INSTRUCTORS = [], isLoading } = usePublicInstructors();
 
   return (
     <>

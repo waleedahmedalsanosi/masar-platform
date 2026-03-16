@@ -1,9 +1,10 @@
-import React from "react";
 import CenterCard from "./CenterCard";
 import Footer from "../../shared/components/Footer";
-import { CENTERS } from "../../data";
+import { usePublicCenters } from "../courses/hooks/usePublicData";
 
 export default function CentersPage() {
+  const { data: centers = [], isLoading } = usePublicCenters();
+
   return (
     <>
       <div style={{ paddingTop: 100 }}>
@@ -14,7 +15,7 @@ export default function CentersPage() {
             <p className="section-sub">Every center is verified, transparent, and ready to help you grow.</p>
           </div>
           <div className="centers-grid">
-            {CENTERS.map(c => <CenterCard key={c.id} center={c} />)}
+            {centers.map(c => <CenterCard key={c.id} center={c} />)}
           </div>
         </section>
       </div>

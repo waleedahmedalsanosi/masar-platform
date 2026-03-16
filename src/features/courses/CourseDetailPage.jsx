@@ -15,19 +15,30 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { COURSES, COURSE_DETAILS, INSTRUCTORS, INSTRUCTOR_DETAILS, CENTERS } from "../../data";
 import QASection from "../../shared/components/QASection";
 import EnrollmentModal from "../../modals/EnrollmentModal";
-import { api } from "../../services/api";
+import * as analyticsService from "../../services/analytics.service";
+import {
+  usePublicCourses,
+  usePublicCourseDetails,
+  usePublicInstructors,
+  usePublicCenters,
+} from "./hooks/usePublicData";
 
 function CourseDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const courseId = parseInt(id);
-  const course = COURSES.find(c => c.id === courseId);
-  const details = COURSE_DETAILS[courseId];
-  const instructor = INSTRUCTORS.find(i => i.name === course?.instructor);
-  const center = course?.center ? CENTERS.find(c => c.name === course.center) : null;
+
+  const { data: courses      = [] } = usePublicCourses();
+  const { data: details           } = usePublicCourseDetails(courseId);
+  const { data: instructors  = [] } = usePublicInstructors();
+  const { data: centers      = [] } = usePublicCenters();
+
+  const course     = courses.find(c => c.id === courseId);
+  const instructor = instructors.find(i => i.name === course?.instructor);
+  const center     = course?.center ? centers.find(c => c.name === course.center) : null;
+
   const [playing, setPlaying] = useState(false);
   const [showEnroll, setShowEnroll] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
@@ -35,7 +46,7 @@ function CourseDetailPage() {
   // تسجيل مشاهدة جديدة عند فتح الصفحة
   useEffect(() => {
     if (courseId) {
-      api.createView({ courseId: String(courseId), viewedAt: new Date().toISOString() })
+      analyticsService.createView({ courseId: String(courseId), viewedAt: new Date().toISOString() })
         .catch(() => {});
     }
   }, [courseId]);

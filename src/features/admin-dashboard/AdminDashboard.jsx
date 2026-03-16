@@ -1,7 +1,15 @@
-import { useState, useEffect } from "react";
-import { api } from "../../services/api";
+import { useState } from "react";
 import { useSettings } from "../../contexts/SettingsContext";
 import { useAuth } from "../../contexts/AuthContext";
+import {
+  useAllUsers,
+  useAllCourses,
+  useAllRequests,
+  useAllViews,
+  useUpdateUserRole,
+  useDeleteUser,
+} from "./hooks/useAdminData";
+import * as coursesService from "../../services/courses.service";
 
 const ROLE_COLORS = {
   student:    { bg: "rgba(16,185,129,0.12)", text: "#10b981" },
@@ -40,32 +48,20 @@ export default function AdminDashboard() {
   const { user } = useAuth();
   const { t } = useSettings();
   const [tab, setTab]               = useState("overview");
-  const [users, setUsers]           = useState([]);
-  const [courses, setCourses]       = useState([]);
-  const [requests, setRequests]     = useState([]);
-  const [views, setViews]           = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState("");
   const [userFilter, setUserFilter] = useState("all");
   const [reqFilter, setReqFilter]   = useState("all");
   const [courseFilter, setCourseFilter] = useState("all");
 
-  useEffect(() => {
-    Promise.all([
-      api.getAllUsers(),
-      api.getAllCourses(),
-      api.getAllRequests(),
-      api.getAllCourseViews(),
-    ])
-      .then(([u, c, r, v]) => {
-        setUsers(u || []);
-        setCourses(c || []);
-        setRequests(r || []);
-        setViews(v || []);
-      })
-      .catch(() => setError(t("admin.serverHint")))
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: users    = [], isLoading: lU, isError: eU } = useAllUsers();
+  const { data: courses  = [], isLoading: lC                } = useAllCourses();
+  const { data: requests = [], isLoading: lR                } = useAllRequests();
+  const { data: views    = []                               } = useAllViews();
+
+  const loading = lU || lC || lR;
+  const error   = eU ? t("admin.serverHint") : "";
+
+  const updateRoleMutation  = useUpdateUserRole();
+  const deleteUserMutation  = useDeleteUser();
 
   // ── Computed values ──────────────────────────────────────────────────────
   const totalUsers       = users.length;
@@ -98,32 +94,25 @@ export default function AdminDashboard() {
   })).sort((a, b) => b.enrollCount - a.enrollCount).slice(0, 5);
 
   // ── User actions ─────────────────────────────────────────────────────────
-  const handleRoleChange = async (userId, newRole) => {
-    try {
-      await api.updateUser(userId, { role: newRole });
-      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
-    } catch {
-      alert("Failed to update role.");
-    }
+  const handleRoleChange = (userId, newRole) => {
+    updateRoleMutation.mutate({ id: userId, role: newRole }, {
+      onError: () => alert("Failed to update role."),
+    });
   };
 
-  const handleDeleteUser = async (userId) => {
+  const handleDeleteUser = (userId) => {
     if (String(userId) === String(user?.id)) { alert(t("admin.cannotDeleteSelf")); return; }
     if (!window.confirm("Delete this user?")) return;
-    try {
-      await api.deleteUser(userId);
-      setUsers(prev => prev.filter(u => u.id !== userId));
-    } catch {
-      alert("Failed to delete user.");
-    }
+    deleteUserMutation.mutate(userId, {
+      onError: () => alert("Failed to delete user."),
+    });
   };
 
   // ── Course actions ───────────────────────────────────────────────────────
   const handleDeleteCourse = async (courseId) => {
     if (!window.confirm("Delete this course?")) return;
     try {
-      await api.deleteCourse(courseId);
-      setCourses(prev => prev.filter(c => c.id !== courseId));
+      await coursesService.deleteCourse(courseId);
     } catch {
       alert("Failed to delete course.");
     }

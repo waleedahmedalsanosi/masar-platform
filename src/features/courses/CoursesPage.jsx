@@ -1,11 +1,12 @@
 import { useState } from "react";
 import CourseCard from "./CourseCard";
 import Footer from "../../shared/components/Footer";
-import { COURSES } from "../../data";
 import { useSettings } from "../../contexts/SettingsContext";
+import { usePublicCourses } from "./hooks/usePublicData";
 
 export default function CoursesPage() {
   const { t } = useSettings();
+  const { data: courses = [], isLoading } = usePublicCourses();
   const categories = [
     { key: "All",              label: () => t("courses.all") },
     { key: "Data Science",     label: () => t("courses.datascience") },
@@ -14,7 +15,7 @@ export default function CoursesPage() {
     { key: "Design",           label: () => t("courses.design") },
   ];
   const [active, setActive] = useState("All");
-  const filtered = active === "All" ? COURSES : COURSES.filter(c => c.category === active);
+  const filtered = active === "All" ? courses : courses.filter(c => c.category === active);
 
   return (
     <>

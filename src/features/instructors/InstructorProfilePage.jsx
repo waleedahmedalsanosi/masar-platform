@@ -1,17 +1,25 @@
-import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import CourseCard from "../courses/CourseCard";
-import { INSTRUCTORS, INSTRUCTOR_DETAILS, COURSES, CENTERS } from "../../data";
+import {
+  usePublicInstructors,
+  usePublicInstructorDetails,
+  usePublicCourses,
+  usePublicCenters,
+} from "../courses/hooks/usePublicData";
 
 export default function InstructorProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const instructorId = parseInt(id);
 
-  const instructor = INSTRUCTORS.find(i => i.id === instructorId);
-  const details = INSTRUCTOR_DETAILS[instructorId];
-  const center = instructor?.center ? CENTERS.find(c => c.name === instructor.center) : null;
-  const instructorCourses = COURSES.filter(c => c.instructor === instructor?.name);
+  const { data: instructors = [] } = usePublicInstructors();
+  const { data: details           } = usePublicInstructorDetails(instructorId);
+  const { data: allCourses  = [] } = usePublicCourses();
+  const { data: centers     = [] } = usePublicCenters();
+
+  const instructor = instructors.find(i => i.id === instructorId);
+  const center = instructor?.center ? centers.find(c => c.name === instructor.center) : null;
+  const instructorCourses = allCourses.filter(c => c.instructor === instructor?.name);
 
   if (!instructor || !details) return null;
 

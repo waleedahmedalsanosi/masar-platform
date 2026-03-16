@@ -1,39 +1,20 @@
-import { useState, useEffect } from "react";
-import { api } from "../../services/api";
+import { useState } from "react";
 import { useSettings } from "../../contexts/SettingsContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { useMarketerData } from "./hooks/useMarketerData";
 
 function MarketerDashboard() {
   const { user } = useAuth();
   const { t } = useSettings();
   const marketerId = String(user?.id || "");
 
-  const [activeTab,   setActiveTab]   = useState("overview");
-  const [assignments, setAssignments] = useState([]);
-  const [referrals,   setReferrals]   = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [copiedLink,  setCopiedLink]  = useState("");
-  const [copiedForm,  setCopiedForm]  = useState("");
-  const [refreshKey,  setRefreshKey]  = useState(0);
+  const [activeTab,  setActiveTab]  = useState("overview");
+  const [copiedLink, setCopiedLink] = useState("");
+  const [copiedForm, setCopiedForm] = useState("");
 
-  const name     = user?.name || "Marketer";
+  const { assignments, referrals, isLoading: loading, reload } = useMarketerData(marketerId);
 
-  const reload = () => setRefreshKey(k => k + 1);
-
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      try {
-        const [a, r] = await Promise.all([
-          api.getMyAssignments(marketerId),
-          api.getMarketerRequests(marketerId),
-        ]);
-        setAssignments(a);
-        setReferrals(r);
-      } catch { } finally { setLoading(false); }
-    };
-    load();
-  }, [marketerId, refreshKey]);
+  const name = user?.name || "Marketer";
 
   const getReferralLink = (a) => `${window.location.origin}/?ref=${marketerId}&course=${a.courseId}`;
   const getFormLink     = (a) => `${window.location.origin}/?ref=${marketerId}&course=${a.courseId}&enroll=1`;
