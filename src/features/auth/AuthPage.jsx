@@ -49,6 +49,13 @@ function AuthPage({ mode }) {
     setError("");
     setLoading(true);
 
+    // Guard: ensure Supabase is configured
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      setError(t("auth.notConfigured"));
+      setLoading(false);
+      return;
+    }
+
     try {
       if (isLogin) {
         // ── Sign In via Supabase Auth ────────────────────────────────────
@@ -82,7 +89,9 @@ function AuthPage({ mode }) {
           },
         });
         if (authErr) {
-          setError(authErr.message.includes("already") ? t("auth.emailExists") : t("auth.serverError"));
+          if (authErr.message.includes("already")) setError(t("auth.emailExists"));
+          else if (authErr.message.includes("Password")) setError(t("auth.weakPassword"));
+          else setError(authErr.message);
           return;
         }
         // Profile auto-created by DB trigger (handle_new_user)
@@ -97,8 +106,8 @@ function AuthPage({ mode }) {
         handleLogin(safeUser);
         navigate(routeForRole(role));
       }
-    } catch {
-      setError(t("auth.serverError"));
+    } catch (err) {
+      setError(err?.message || t("auth.serverError"));
     } finally {
       setLoading(false);
     }
