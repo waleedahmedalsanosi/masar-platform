@@ -1,9 +1,20 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import styles from "./styles/globalStyles";
 import { SettingsProvider } from "./contexts/SettingsContext";
 import { AuthProvider } from "./contexts/AuthContext";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime:  1000 * 60 * 5,  // 5 min — don't refetch if data is fresh
+      gcTime:     1000 * 60 * 10, // 10 min — keep unused data in cache
+      retry: 1,
+    },
+  },
+});
 import ProtectedRoute from "./routes/ProtectedRoute";
 import RoleRoute from "./routes/RoleRoute";
 
@@ -80,12 +91,14 @@ function AppLayout() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <SettingsProvider>
-        <style dangerouslySetInnerHTML={{ __html: styles }} />
-        <ScrollToTop />
-        <AppLayout />
-      </SettingsProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <SettingsProvider>
+          <style dangerouslySetInnerHTML={{ __html: styles }} />
+          <ScrollToTop />
+          <AppLayout />
+        </SettingsProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
