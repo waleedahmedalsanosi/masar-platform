@@ -179,16 +179,6 @@ function AuthPage({ mode }) {
           {loading ? t("auth.loading") : isLogin ? t("auth.signinBtn") : t("auth.createBtn")}
         </button>
 
-        {isLogin && (
-          <div style={{ marginTop: "1rem", padding: "0.75rem", background: "rgba(99,102,241,0.05)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 8, fontSize: "0.75rem", color: "var(--text3)", lineHeight: 1.6 }}>
-            <strong style={{ color: "var(--text2)" }}>{t("auth.demoAccounts")}</strong><br />
-            {t("auth.demoInstructor")}<br />
-            {t("auth.demoStudent")}<br />
-            {t("auth.demoMarketer")}<br />
-            {t("auth.demoCenter")}<br />
-            {t("auth.demoAdmin")}
-          </div>
-        )}
 
         <div className="auth-footer">
           {isLogin ? t("auth.noAccountYet") : t("auth.haveAccount")}{" "}

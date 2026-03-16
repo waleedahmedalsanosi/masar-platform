@@ -12,11 +12,6 @@
 
 import { useState } from "react";
 
-const SAMPLE_QA = [
-  { id:1, sender:"Rania Hassan", anon:false, to:"instructor", question:"Is prior programming knowledge required before joining?", answer:"No prior experience needed at all — we start from absolute zero. Just bring your laptop and curiosity!", answeredBy:"Ahmed Hassan", time:"2 days ago" },
-  { id:2, sender:"Anonymous", anon:true, to:"instructor", question:"Will sessions be recorded in case I miss one?", answer:"Yes, all sessions are recorded and uploaded within 24 hours to the course group.", answeredBy:"Ahmed Hassan", time:"1 week ago" },
-  { id:3, sender:"Kamal Ibrahim", anon:false, to:"center", question:"Do you offer any discounts for university students?", answer:"Yes! Students get 15% off — just send your university ID to our WhatsApp.", answeredBy:"Code Academy Sudan", time:"3 days ago" },
-];
 
 function QASection({ course, instructor, center }) {
   const [recipient, setRecipient] = useState("instructor");
@@ -104,8 +99,8 @@ function QASection({ course, instructor, center }) {
 
         {/* Existing Q&A */}
         <div className="qa-existing">
-          <div className="qa-existing-title">Previous Questions ({SAMPLE_QA.length})</div>
-          {SAMPLE_QA.map(q => (
+          <div className="qa-existing-title">Previous Questions (0)</div>
+          {[].map(q => (
             <div key={q.id} className="qa-item">
               <div className="qa-item-header">
                 <div style={{width:22,height:22,borderRadius:"50%",background:"var(--gradient)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.6rem",fontWeight:700,color:"white",flexShrink:0}}>

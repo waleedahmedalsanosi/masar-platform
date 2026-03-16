@@ -11,12 +11,7 @@
  */
 
 /** @type {Stat[]} الإحصائيات الرئيسية للمنصة */
-export const STATS = [
-  { label: "Active Students", value: "12,000+", icon: "👨‍💻" },
-  { label: "Courses Available", value: "150+", icon: "📚" },
-  { label: "Training Centers", value: "25+", icon: "🏢" },
-  { label: "Expert Instructors", value: "80+", icon: "🎓" },
-];
+export const STATS = [];
 
 /**
  * @typedef {Object} Feature

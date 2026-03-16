@@ -21,55 +21,17 @@ import AddInstructorModal from "../../modals/AddInstructorModal";
 import CourseReviewModal from "../../modals/CourseReviewModal";
 import { useSettings } from "../../contexts/SettingsContext";
 import { useAuth } from "../../contexts/AuthContext";
-import { CENTERS } from "../../data";
 
-const CENTER_MOCK_INSTRUCTORS = [
-  { id:1, name:"Ahmed Hassan",    avatar:"AH", title:"Data Scientist",      courses:2, students:320, rating:4.8, revenue:168000, feePerStudent:50, status:"active",  joinDate:"Jan 2024" },
-  { id:2, name:"Sara Mohamed",    avatar:"SM", title:"Full Stack Dev",       courses:1, students:210, rating:4.9, revenue:87500,  feePerStudent:50, status:"active",  joinDate:"Mar 2024" },
-  { id:3, name:"Khalid Ibrahim",  avatar:"KI", title:"ML Engineer",          courses:1, students:180, rating:4.7, revenue:94500,  feePerStudent:50, status:"active",  joinDate:"Feb 2024" },
-  { id:4, name:"Amira Osman",     avatar:"AO", title:"UI/UX Designer",       courses:1, students:0,   rating:0,   revenue:0,      feePerStudent:50, status:"pending", joinDate:"This week" },
-];
-
-const CENTER_MOCK_COURSES = [
-  { id:1, image:"🐍", title:"Python for Data Science",       instructor:"Ahmed Hassan",  students:320, price:150, centerFee:50, status:"published", rating:4.8, publishDate:"Jan 10, 2024", views:245 },
-  { id:3, image:"🤖", title:"Machine Learning Fundamentals", instructor:"Khalid Ibrahim",students:180, price:300, centerFee:50, status:"published", rating:4.7, publishDate:"Feb 5, 2024",  views:167 },
-  { id:2, image:"🌐", title:"Full Stack Web Development",    instructor:"Sara Mohamed",  students:210, price:250, centerFee:50, status:"published", rating:4.9, publishDate:"Mar 1, 2024",  views:198 },
-  { id:9, image:"🔧", title:"Data Engineering Bootcamp",     instructor:"Ahmed Hassan",  students:0,   price:280, centerFee:50, status:"active",    rating:0,   publishDate:"This week",     views:43  },
-  { id:10,image:"🎨", title:"UI/UX Fundamentals",            instructor:"Amira Osman",   students:0,   price:120, centerFee:50, status:"draft",     rating:0,   publishDate:"—",             views:12  },
-];
-
-const CENTER_MOCK_REQUESTS = [
-  { id:1, name:"Rania Hassan",  avatar:"RH", course:"Python for Data Science",       instructor:"Ahmed Hassan",  payment:"bank", amount:150, time:"2h ago",  status:"pending"  },
-  { id:2, name:"Kamal Ibrahim", avatar:"KI", course:"Machine Learning Fundamentals", instructor:"Khalid Ibrahim",payment:"momo", amount:300, time:"4h ago",  status:"pending"  },
-  { id:3, name:"Nour Abdallah", avatar:"NA", course:"Full Stack Web Development",    instructor:"Sara Mohamed",  payment:"bank", amount:250, time:"1d ago",  status:"accepted" },
-  { id:4, name:"Yassir Musa",   avatar:"YM", course:"Python for Data Science",       instructor:"Ahmed Hassan",  payment:"momo", amount:150, time:"2d ago",  status:"rejected" },
-  { id:5, name:"Salma Elzain",  avatar:"SE", course:"Machine Learning Fundamentals", instructor:"Khalid Ibrahim",payment:"bank", amount:300, time:"3d ago",  status:"accepted" },
-  { id:6, name:"Fatima Omar",   avatar:"FO", course:"Python for Data Science",       instructor:"Ahmed Hassan",  payment:null,   amount:150, time:"30m ago", status:"reserved" },
-  { id:7, name:"Omar Bashir",   avatar:"OB", course:"Full Stack Web Development",    instructor:"Sara Mohamed",  payment:null,   amount:250, time:"1h ago",  status:"reserved" },
-];
-
-const CENTER_FINANCES = {
-  // Flat fee model: center earns SDG 50 per enrolled student (instructors keep the rest)
-  feePerStudent: 50,
-  totalStudents: 710,
-  totalFeeRevenue: 35500,   // 710 students × SDG 50
-  thisMonth: 6000,          // ~120 new students × SDG 50
-  pending: 2500,            // fees not yet collected
-  instructorEarnings: [
-    { name:"Ahmed Hassan",   avatar:"AH", students:320, price:150, grossSDG:168000, centerFee:16000, netSDG:152000, paid:140000, due:12000 },
-    { name:"Sara Mohamed",   avatar:"SM", students:210, price:250, grossSDG:87500,  centerFee:10500, netSDG:77000,  paid:77000,  due:0     },
-    { name:"Khalid Ibrahim", avatar:"KI", students:180, price:300, grossSDG:94500,  centerFee:9000,  netSDG:85500,  paid:75000,  due:10500 },
-  ],
-};
+const FEE_PER_STUDENT = 50; // SDG flat fee per enrolled student
 
 function CenterOwnerDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useSettings();
   const [activeTab, setActiveTab]   = useState("overview");
-  const [instructors, setInstructors] = useState(CENTER_MOCK_INSTRUCTORS);
-  const [courses, setCourses]       = useState(CENTER_MOCK_COURSES);
-  const [requests, setRequests]     = useState(CENTER_MOCK_REQUESTS);
+  const [instructors, setInstructors] = useState([]);
+  const [courses, setCourses]       = useState([]);
+  const [requests, setRequests]     = useState([]);
   const [showAddInstructor, setShowAddInstructor] = useState(false);
   const [editSplitInstructor, setEditSplitInstructor] = useState(null);
   const [reviewCourse, setReviewCourse] = useState(null);
@@ -77,8 +39,14 @@ function CenterOwnerDashboard() {
   const [paidInstructors, setPaidInstructors] = useState([]);
   const [centerProfileSaved, setCenterProfileSaved] = useState(false);
 
-  const center = CENTERS[0]; // Code Academy Sudan as default
-  const name   = user?.name || "Omar Salih";
+  const centerName = user?.centerName || user?.name || "My Center";
+  const center = {
+    name: centerName,
+    logo: centerName.split(" ").map(n=>n[0]).join("").slice(0,2).toUpperCase(),
+    color: "#6366f1",
+    tagline: "",
+  };
+  const name   = user?.name || centerName;
   const initials = name.split(" ").map(n=>n[0]).join("").slice(0,2).toUpperCase();
 
   const pendingRequests  = requests.filter(r=>r.status==="pending").length;
@@ -96,7 +64,7 @@ function CenterOwnerDashboard() {
   const handleInstructorAction = (id, action) =>
     setInstructors(prev=>prev.map(i=>i.id===id?{...i,status:action}:i));
 
-  const totalCenterViews   = CENTER_MOCK_COURSES.reduce((s,c)=>s+(c.views||0),0);
+  const totalCenterViews   = courses.reduce((s,c)=>s+(c.views||0),0);
   const centerReserved     = requests.filter(r=>r.status==="reserved").length;
   const centerAccepted     = requests.filter(r=>r.status==="accepted").length;
   const centerConvRate     = totalCenterViews > 0 ? Math.round((centerAccepted / totalCenterViews) * 100) : 0;
@@ -214,7 +182,7 @@ function CenterOwnerDashboard() {
               <StatCard icon="👥" val={totalStudents.toLocaleString()} lbl="Total Students" trend={`across ${activeInstructors} instructors`} color="#6366f1" />
               <StatCard icon="📚" val={courses.filter(c=>c.status==="published").length} lbl="Active Courses" trend={"Instructors publish freely"} color="#06b6d4" onClick={pendingCourses?()=>setActiveTab("courses"):null} />
               <StatCard icon="⭐" val="4.8" lbl="Center Rating" trend="Top 5% on Masar" color="#fbbf24" />
-              <StatCard icon="💰" val={`SDG ${(CENTER_FINANCES.totalFeeRevenue/1000).toFixed(1)}K`} lbl="Fee Revenue" trend={`SDG ${CENTER_FINANCES.feePerStudent}/student · ${CENTER_FINANCES.totalStudents} enrolled`} color="#22c55e" onClick={()=>setActiveTab("finances")} />
+              <StatCard icon="💰" val={`SDG ${((totalStudents*FEE_PER_STUDENT)/1000).toFixed(1)}K`} lbl="Fee Revenue" trend={`SDG ${FEE_PER_STUDENT}/student · ${totalStudents} enrolled`} color="#22c55e" onClick={()=>setActiveTab("finances")} />
             </div>
 
             <div className="ov-grid">
@@ -328,7 +296,7 @@ function CenterOwnerDashboard() {
             </div>
             <div style={{background:"rgba(6,182,212,0.06)",border:"1px solid rgba(6,182,212,0.15)",borderRadius:10,padding:"0.75rem 1.1rem",marginBottom:"1.25rem",fontSize:"0.82rem",color:"var(--text2)",display:"flex",alignItems:"center",gap:"0.75rem"}}>
               <span>ℹ️</span>
-              <span>Instructors publish courses freely. Each enrollment generates a <strong style={{color:"var(--cyan)"}}>SDG {CENTER_FINANCES.feePerStudent} flat fee</strong> for the center.</span>
+              <span>Instructors publish courses freely. Each enrollment generates a <strong style={{color:"var(--cyan)"}}>SDG {FEE_PER_STUDENT} flat fee</strong> for the center.</span>
             </div>
             <div className="courses-mgmt">
               {courses.map(c=>(
@@ -559,9 +527,9 @@ function CenterOwnerDashboard() {
             {/* Summary cards */}
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"1rem",marginBottom:"1.5rem"}}>
               {[
-                { icon:"💰", label:"Fee Revenue",      val:`SDG ${CENTER_FINANCES.totalFeeRevenue.toLocaleString()}`, sub:`SDG ${CENTER_FINANCES.feePerStudent} × ${CENTER_FINANCES.totalStudents} students`, color:"#06b6d4" },
-                { icon:"📅", label:"This Month",       val:`SDG ${CENTER_FINANCES.thisMonth.toLocaleString()}`,   sub:"March 2025",       color:"#22c55e" },
-                { icon:"⏳", label:"Pending Payments", val:`SDG ${CENTER_FINANCES.pending.toLocaleString()}`,     sub:"Awaiting receipts", color:"#fbbf24" },
+                { icon:"💰", label:"Fee Revenue",      val:`SDG ${(totalStudents*FEE_PER_STUDENT).toLocaleString()}`, sub:`SDG ${FEE_PER_STUDENT} × ${totalStudents} students`, color:"#06b6d4" },
+                { icon:"📅", label:"This Month",       val:"SDG 0",   sub:"No enrollments yet",   color:"#22c55e" },
+                { icon:"⏳", label:"Pending Payments", val:"SDG 0",   sub:"Awaiting receipts",    color:"#fbbf24" },
               ].map(s=>(
                 <div key={s.label} className="ov-stat-card">
                   <div className="ov-stat-glow" style={{background:s.color}}/>
@@ -575,7 +543,7 @@ function CenterOwnerDashboard() {
 
             {/* Instructor payouts table */}
   <div style={{marginBottom:"0.75rem",background:"rgba(99,102,241,0.06)",border:"1px solid rgba(99,102,241,0.15)",borderRadius:10,padding:"0.875rem 1rem",fontSize:"0.82rem",color:"var(--text2)"}}>
-              💡 Revenue model: Instructors set their own prices. The center earns a flat <strong style={{color:"var(--cyan)"}}>SDG {CENTER_FINANCES.feePerStudent}</strong> per enrolled student — regardless of course price.
+              💡 Revenue model: Instructors set their own prices. The center earns a flat <strong style={{color:"var(--cyan)"}}>SDG {FEE_PER_STUDENT}</strong> per enrolled student — regardless of course price.
             </div>
             <div className="ov-card">
               <div className="ov-card-hd">Instructor Earnings & Center Fees</div>
@@ -589,7 +557,7 @@ function CenterOwnerDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {CENTER_FINANCES.instructorEarnings.map(p=>(
+                    {instructors.filter(i=>i.status==="active").map(p=>(
                       <tr key={p.name} style={{borderBottom:"1px solid var(--border2)"}}>
                         <td style={{padding:"0.75rem 1rem"}}>
                           <div style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>
@@ -620,7 +588,7 @@ function CenterOwnerDashboard() {
                     <tr style={{background:"var(--bg3)"}}>
                       <td colSpan={4} style={{padding:"0.875rem 1rem",fontWeight:700,fontSize:"0.82rem"}}>Total Center Revenue (flat fees)</td>
                       <td colSpan={3} style={{padding:"0.875rem 1rem",fontFamily:"Syne,sans-serif",fontWeight:800,color:"var(--cyan)",fontSize:"1rem"}}>
-                        SDG {CENTER_FINANCES.totalFeeRevenue.toLocaleString()}
+                        SDG {(totalStudents * FEE_PER_STUDENT).toLocaleString()}
                       </td>
                     </tr>
                   </tfoot>
