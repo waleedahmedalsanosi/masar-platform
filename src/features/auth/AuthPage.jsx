@@ -46,6 +46,7 @@ function AuthPage({ mode }) {
   const handleSubmit = async () => {
     if (!email || !password) { setError(t("auth.fillFields")); return; }
     if (!isLogin && !name)   { setError(t("auth.enterName")); return; }
+    if (password.length < 6) { setError(t("auth.passwordShort")); return; }
     setError("");
     setLoading(true);
 
