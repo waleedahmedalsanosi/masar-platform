@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "../../../lib/query.jsx";
 import * as coursesService     from "../../../services/courses.service";
 import * as enrollmentsService from "../../../services/enrollments.service";
 import * as qaService          from "../../../services/qa.service";

@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "../../../lib/query.jsx";
 import * as marketersService   from "../../../services/marketers.service";
 import * as enrollmentsService from "../../../services/enrollments.service";
 

@@ -1,20 +1,12 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "./lib/query.jsx";
 
 import styles from "./styles/globalStyles";
 import { SettingsProvider } from "./contexts/SettingsContext";
 import { AuthProvider } from "./contexts/AuthContext";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime:  1000 * 60 * 5,  // 5 min — don't refetch if data is fresh
-      gcTime:     1000 * 60 * 10, // 10 min — keep unused data in cache
-      retry: 1,
-    },
-  },
-});
+const queryClient = new QueryClient();
 import ProtectedRoute from "./routes/ProtectedRoute";
 import RoleRoute from "./routes/RoleRoute";
 

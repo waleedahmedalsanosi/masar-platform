@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "../../../lib/query.jsx";
 import * as publicService from "../../../services/public.service";
 
 export const usePublicCourses = () =>
