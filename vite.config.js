@@ -3,4 +3,10 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  optimizeDeps: {
+    include: ["@tanstack/react-query", "@tanstack/query-core"],
+  },
+  resolve: {
+    dedupe: ["react", "react-dom"],
+  },
 });
