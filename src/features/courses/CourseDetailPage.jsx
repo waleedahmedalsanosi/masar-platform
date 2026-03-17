@@ -18,6 +18,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import QASection from "../../shared/components/QASection";
 import EnrollmentModal from "../../modals/EnrollmentModal";
 import * as analyticsService from "../../services/analytics.service";
+import { INSTRUCTOR_DETAILS } from "../../data";
 import {
   usePublicCourses,
   usePublicCourseDetails,
